@@ -1,4 +1,5 @@
 import { getBudgetRows, getOverviewTotals, sumForCategory } from "./domain/budgets.js";
+import { getNextExpandedParentId } from "./domain/categoryTree.js";
 import { getPeriodRange, isDateInPeriod } from "./domain/dates.js";
 import {
   addCategory,
@@ -30,6 +31,7 @@ const state = {
   detailsChild: "all",
   detailsKeyword: "",
   selectedCategoryId: null,
+  expandedParentId: null,
   editingExpenseId: null,
   importMode: "overwrite",
   importText: "",
@@ -344,7 +346,12 @@ function bindEvents() {
 function bindCategoryEvents() {
   document.querySelectorAll("[data-select-category]").forEach((button) => {
     button.addEventListener("click", () => {
-      state.selectedCategoryId = button.dataset.selectCategory;
+      const categoryId = button.dataset.selectCategory;
+      const category = state.data.categories.find((item) => item.id === categoryId);
+      state.selectedCategoryId = categoryId;
+      if (category && !category.parentId) {
+        state.expandedParentId = getNextExpandedParentId(state.expandedParentId, categoryId);
+      }
       render();
     });
   });
@@ -490,25 +497,44 @@ function bindImportExportEvents() {
 }
 
 function navButton(id, label, compact = false) {
-  return `<button class="nav-btn ${state.view === id ? "active" : ""}" data-view="${id}"><span>${navIcon(id)}</span>${compact ? `<em>${shortLabel(label)}</em>` : label}</button>`;
+  return `
+    <button class="nav-btn ${state.view === id ? "active" : ""}" data-view="${id}">
+      <span class="nav-icon icon-${id}" aria-hidden="true"></span>
+      <em>${compact ? shortLabel(label) : label}</em>
+    </button>
+  `;
 }
 
 function budgetRow(row) {
   const pct = Math.min(100, Math.round(row.ratio * 100));
   return `
     <button class="budget-row ${row.state}" data-filter-category="${row.categoryId}">
-      <div>
+      <div class="budget-main">
         <strong>${escapeHtml(row.categoryName)}</strong>
-        <span>${money(row.spent)} of ${money(row.amount)}</span>
+        <span>${labelPeriod(row.period)} rule</span>
       </div>
-      <div class="progress"><i style="width:${pct}%"></i></div>
-      <b>${pct}%</b>
+      <div class="budget-cell">
+        <span>Spent</span>
+        <b>${money(row.spent)}</b>
+      </div>
+      <div class="budget-cell">
+        <span>Budget</span>
+        <b>${money(row.amount)}</b>
+      </div>
+      <div class="budget-cell ${row.remaining < 0 ? "negative" : "positive"}">
+        <span>Remaining</span>
+        <b>${money(row.remaining)}</b>
+      </div>
+      <div class="progress-cell">
+        <div class="progress"><i style="width:${pct}%"></i></div>
+      </div>
+      <strong class="budget-percent">${pct}%</strong>
     </button>
   `;
 }
 
 function metricCard(label, value, caption) {
-  return `<div class="metric"><span>${label}</span><strong>${value}</strong><em>${caption}</em></div>`;
+  return `<div class="metric metric-${label.toLowerCase()}"><span>${label}</span><strong>${value}</strong><em>${caption}</em></div>`;
 }
 
 function expenseItem(expense) {
@@ -555,17 +581,19 @@ function editExpenseForm(expense) {
 }
 
 function categoryBranch(parent) {
+  const isExpanded = state.expandedParentId === parent.id;
   const children = childCategories(parent.id);
   return `
     <div class="branch">
-      <button class="category-node parent ${selectedClass(parent.id)} ${parent.active ? "" : "muted"}" data-select-category="${parent.id}">
+      <button class="category-node parent ${selectedClass(parent.id)} ${parent.active ? "" : "muted"}" data-select-category="${parent.id}" aria-expanded="${isExpanded}">
+        <span class="tree-toggle">${isExpanded ? "-" : "+"}</span>
         ${escapeHtml(parent.name)}
       </button>
-      <div class="children">${children.map((child) => `
+      ${isExpanded ? `<div class="children">${children.map((child) => `
         <button class="category-node ${selectedClass(child.id)} ${child.active ? "" : "muted"}" data-select-category="${child.id}">
           ${escapeHtml(child.name)}
         </button>
-      `).join("")}</div>
+      `).join("")}</div>` : ""}
     </div>
   `;
 }
@@ -683,10 +711,6 @@ function selectedClass(id) {
 
 function shortLabel(label) {
   return label.replace("Categories & Budgets", "Budgets").replace("Import & Export", "Import");
-}
-
-function navIcon(id) {
-  return ({ overview: "⌂", add: "+", categories: "□", details: "≡", import: "⇅" })[id] || "•";
 }
 
 function escapeHtml(value) {
