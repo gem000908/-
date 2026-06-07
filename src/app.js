@@ -308,6 +308,7 @@ function bindEvents() {
       state.view = button.dataset.view;
       state.notice = "";
       render();
+      window.scrollTo({ top: 0, left: 0, behavior: "auto" });
     });
   });
   document.querySelectorAll("[data-period]").forEach((button) => {
