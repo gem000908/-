@@ -114,6 +114,15 @@ function overviewView(period) {
             <h2>Budget Status</h2>
             <span>${labelPeriod(period)}</span>
           </div>
+          ${rows.length ? `
+            <div class="budget-header">
+              <span>Category</span>
+              <span>Spent</span>
+              <span>Budget</span>
+              <span>Remaining</span>
+              <span>Progress</span>
+            </div>
+          ` : ""}
           <div class="budget-list">
             ${rows.length ? rows.map(budgetRow).join("") : emptyState("No active budget rules for this period.")}
           </div>
@@ -508,11 +517,15 @@ function navButton(id, label, compact = false) {
 
 function budgetRow(row) {
   const pct = Math.min(100, Math.round(row.ratio * 100));
+  const tone = categoryTone(row.categoryName);
   return `
     <button class="budget-row ${row.state}" data-filter-category="${row.categoryId}">
       <div class="budget-main">
-        <strong>${escapeHtml(row.categoryName)}</strong>
-        <span>${labelPeriod(row.period)} rule</span>
+        <span class="category-orb ${tone}" aria-hidden="true">${categoryInitial(row.categoryName)}</span>
+        <span>
+          <strong>${escapeHtml(row.categoryName)}</strong>
+          <em>${labelPeriod(row.period)} rule</em>
+        </span>
       </div>
       <div class="budget-cell">
         <span>Spent</span>
@@ -535,12 +548,23 @@ function budgetRow(row) {
 }
 
 function metricCard(label, value, caption) {
-  return `<div class="metric metric-${label.toLowerCase()}"><span>${label}</span><strong>${value}</strong><em>${caption}</em></div>`;
+  return `
+    <div class="metric metric-${label.toLowerCase()}">
+      <div>
+        <span>${label}</span>
+        <strong>${value}</strong>
+        <em>${caption}</em>
+      </div>
+      <i class="metric-icon" aria-hidden="true"></i>
+    </div>
+  `;
 }
 
 function expenseItem(expense) {
+  const tone = categoryTone(categoryPath(expense));
   return `
     <div class="expense-item">
+      <span class="category-orb ${tone}" aria-hidden="true">${categoryInitial(categoryPath(expense))}</span>
       <div><strong>${escapeHtml(categoryPath(expense))}</strong><span>${escapeHtml(expense.note || "No note")}</span></div>
       <div><b>${money(expense.amount)}</b><span>${expense.date}</span></div>
     </div>
@@ -611,7 +635,17 @@ function ruleItem(rule) {
 
 function signalList(rows) {
   const signals = rows.filter((row) => row.state !== "normal");
-  if (!signals.length) return emptyState("No categories near or over budget.");
+  if (!signals.length) {
+    return `
+      <div class="signal signal-ok">
+        <span class="signal-check" aria-hidden="true"></span>
+        <div>
+          <strong>All budgets look healthy</strong>
+          <span>No categories near or over budget.</span>
+        </div>
+      </div>
+    `;
+  }
   return `<div class="signal-list">${signals.map((row) => `
     <div class="signal ${row.state}">
       <strong>${escapeHtml(row.categoryName)}</strong>
@@ -712,6 +746,20 @@ function selectedClass(id) {
 
 function shortLabel(label) {
   return label.replace("Categories & Budgets", "Budgets").replace("Import & Export", "Import");
+}
+
+function categoryTone(value) {
+  const text = value.toLowerCase();
+  if (text.includes("food") || text.includes("takeout") || text.includes("groceries")) return "tone-mint";
+  if (text.includes("transport") || text.includes("subway") || text.includes("taxi")) return "tone-blue";
+  if (text.includes("entertainment") || text.includes("movies")) return "tone-amber";
+  if (text.includes("health") || text.includes("medicine")) return "tone-rose";
+  if (text.includes("learning") || text.includes("books")) return "tone-violet";
+  return "tone-gray";
+}
+
+function categoryInitial(value) {
+  return String(value || "?").replace(/[^a-zA-Z]/g, "").slice(0, 1).toUpperCase() || "?";
 }
 
 function escapeHtml(value) {
