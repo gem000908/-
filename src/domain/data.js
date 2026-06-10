@@ -25,7 +25,7 @@ export function addExpense(data, input, now = new Date().toISOString()) {
 
 export function editExpense(data, expenseId, patch, now = new Date().toISOString()) {
   const current = data.expenses.find((expense) => expense.id === expenseId);
-  if (!current) throw new Error("Expense not found");
+  if (!current) throw new Error("没有找到这条支出");
   const nextExpense = { ...current, ...patch, updatedAt: now };
   validateExpenseInput(data, nextExpense, { allowDisabled: true });
   return {
@@ -43,9 +43,9 @@ export function deleteExpense(data, expenseId) {
 
 export function addCategory(data, { name, parentId = null }, now = new Date().toISOString()) {
   const trimmed = name.trim();
-  if (!trimmed) throw new Error("Category name is required");
+  if (!trimmed) throw new Error("分类名称不能为空");
   if (parentId && !data.categories.some((category) => category.id === parentId && !category.parentId)) {
-    throw new Error("Parent category not found");
+    throw new Error("没有找到一级分类");
   }
   return {
     ...data,
@@ -61,7 +61,7 @@ export function addCategory(data, { name, parentId = null }, now = new Date().to
 
 export function renameCategory(data, categoryId, name) {
   const trimmed = name.trim();
-  if (!trimmed) throw new Error("Category name is required");
+  if (!trimmed) throw new Error("分类名称不能为空");
   return {
     ...data,
     categories: data.categories.map((category) => category.id === categoryId ? { ...category, name: trimmed } : category)
@@ -101,20 +101,20 @@ export function deleteBudgetRule(data, budgetRuleId) {
 }
 
 function validateExpenseInput(data, input, options = {}) {
-  if (!(Number(input.amount) > 0)) throw new Error("Amount must be greater than 0");
+  if (!(Number(input.amount) > 0)) throw new Error("金额必须大于 0");
   if (!/^\d{4}-\d{2}-\d{2}$/.test(input.date) || Number.isNaN(new Date(`${input.date}T00:00:00.000Z`).getTime())) {
-    throw new Error("Date must be valid");
+    throw new Error("日期无效");
   }
   const child = data.categories.find((category) => category.id === input.subcategoryId && category.parentId);
-  if (!child) throw new Error("Child category must be selected");
-  if (child.parentId !== input.categoryId) throw new Error("Child category must match parent category");
-  if (!options.allowDisabled && !child.active) throw new Error("Disabled categories are not preferred for new expenses");
+  if (!child) throw new Error("请选择二级分类");
+  if (child.parentId !== input.categoryId) throw new Error("二级分类必须属于所选一级分类");
+  if (!options.allowDisabled && !child.active) throw new Error("停用分类不建议用于新增支出");
 }
 
 function validateBudgetInput(data, input) {
-  if (!(Number(input.amount) > 0)) throw new Error("Budget amount must be greater than 0");
-  if (!isPeriod(input.period)) throw new Error("Budget period is invalid");
-  if (!data.categories.some((category) => category.id === input.categoryId)) throw new Error("Budget category does not exist");
+  if (!(Number(input.amount) > 0)) throw new Error("预算金额必须大于 0");
+  if (!isPeriod(input.period)) throw new Error("预算周期无效");
+  if (!data.categories.some((category) => category.id === input.categoryId)) throw new Error("预算分类不存在");
 }
 
 function createId(prefix) {

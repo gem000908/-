@@ -54,7 +54,7 @@ test("deleteExpense removes the requested expense only", () => {
 
 test("category rename, disable, and budget upsert are immutable", () => {
   const data = createInitialData("2026-06-07T10:00:00.000Z");
-  const renamed = renameCategory(data, "food", "Meals");
+  const renamed = renameCategory(data, "food", "正餐");
   const disabled = disableCategory(renamed, "takeout");
   const budgeted = upsertBudgetRule(disabled, {
     categoryId: "food",
@@ -63,8 +63,8 @@ test("category rename, disable, and budget upsert are immutable", () => {
     active: true
   });
 
-  assert.equal(data.categories.find((category) => category.id === "food").name, "Food");
-  assert.equal(renamed.categories.find((category) => category.id === "food").name, "Meals");
+  assert.equal(data.categories.find((category) => category.id === "food").name, "餐饮");
+  assert.equal(renamed.categories.find((category) => category.id === "food").name, "正餐");
   assert.equal(disabled.categories.find((category) => category.id === "takeout").active, false);
   assert.equal(budgeted.budgetRules.some((rule) => rule.categoryId === "food" && rule.amount === 2000), true);
 });

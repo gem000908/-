@@ -1,4 +1,5 @@
 import { getBudgetRows, getOverviewTotals, sumForCategory } from "./domain/budgets.js";
+import { getCategoryFallbackText, getCategoryGlyph, getCategoryTone } from "./domain/categoryDisplay.js";
 import { getNextExpandedParentId } from "./domain/categoryTree.js";
 import { getPeriodRange, isDateInPeriod } from "./domain/dates.js";
 import {
@@ -15,11 +16,11 @@ import { exportCsv, exportJson } from "./domain/importExport.js";
 import { applyImport, loadData, saveData } from "./storage/localStore.js";
 
 const navItems = [
-  ["overview", "Overview"],
-  ["add", "Add Expense"],
-  ["categories", "Categories & Budgets"],
-  ["details", "Details"],
-  ["import", "Import & Export"]
+  ["overview", "总览"],
+  ["add", "记一笔"],
+  ["categories", "分类与预算"],
+  ["details", "流水明细"],
+  ["import", "导入导出"]
 ];
 
 const state = {
@@ -49,14 +50,14 @@ function render() {
         <div class="brand">
           <div class="brand-mark">¥</div>
           <div>
-            <strong>Budget Ledger</strong>
-            <span>Local expense control</span>
+            <strong>每日记账</strong>
+            <span>本地支出流水</span>
           </div>
         </div>
         <nav class="nav-list">${navItems.map(([id, label]) => navButton(id, label)).join("")}</nav>
         <div class="sidebar-footer">
-          <span>Stored locally</span>
-          <strong>${state.data.expenses.length} expenses</strong>
+          <span>数据保存在本机</span>
+          <strong>${state.data.expenses.length} 条流水</strong>
         </div>
       </aside>
       <main class="content">
@@ -95,51 +96,51 @@ function overviewView(period) {
       <div class="main-column">
         <header class="page-head">
           <div>
-            <h1>Overview</h1>
+            <h1>总览</h1>
             <p>${rangeLabel(period, today)}</p>
           </div>
-          <div class="segmented" role="group" aria-label="Overview period">
+          <div class="segmented" role="group" aria-label="总览周期">
             ${["weekly", "monthly", "yearly"].map((item) => `
               <button class="${period === item ? "active" : ""}" data-period="${item}">${labelPeriod(item)}</button>
             `).join("")}
           </div>
         </header>
         <div class="metric-row">
-          ${metricCard("Spent", money(totals.spent), "Total recorded expenses")}
-          ${metricCard("Remaining", money(totals.remaining), totals.remaining < 0 ? `${money(totals.overage)} over budget` : "Available budget")}
-          ${metricCard("Budgeted", money(totals.budgeted), `${rows.length} active rules`)}
+          ${metricCard("spent", "已支出", money(totals.spent), "本周期已记录支出")}
+          ${metricCard("remaining", "剩余", money(totals.remaining), totals.remaining < 0 ? `超出预算 ${money(totals.overage)}` : "可用预算")}
+          ${metricCard("budgeted", "预算", money(totals.budgeted), `${rows.length} 条启用规则`)}
         </div>
         <section class="panel budget-panel">
           <div class="panel-head">
-            <h2>Budget Status</h2>
+            <h2>预算状态</h2>
             <span>${labelPeriod(period)}</span>
           </div>
           ${rows.length ? `
             <div class="budget-header">
-              <span>Category</span>
-              <span>Spent</span>
-              <span>Budget</span>
-              <span>Remaining</span>
-              <span>Progress</span>
+              <span>分类</span>
+              <span>已支出</span>
+              <span>预算</span>
+              <span>剩余</span>
+              <span>进度</span>
             </div>
           ` : ""}
           <div class="budget-list">
-            ${rows.length ? rows.map(budgetRow).join("") : emptyState("No active budget rules for this period.")}
+            ${rows.length ? rows.map(budgetRow).join("") : emptyState("当前周期还没有启用的预算规则。")}
           </div>
         </section>
         <section class="panel">
           <div class="panel-head">
-            <h2>Recent Expenses</h2>
-            <button class="text-btn" data-view="details">View all</button>
+            <h2>最近流水</h2>
+            <button class="text-btn" data-view="details">查看全部</button>
           </div>
-          <div class="recent-list">${recent.length ? recent.map(expenseItem).join("") : emptyState("Add your first expense to start tracking usage.")}</div>
+          <div class="recent-list">${recent.length ? recent.map(expenseItem).join("") : emptyState("先记一笔支出，开始追踪日常花销。")}</div>
         </section>
       </div>
       <aside class="right-column">
         ${addExpenseView("compact")}
         <section class="panel">
           <div class="panel-head">
-            <h2>Signals</h2>
+            <h2>提醒</h2>
           </div>
           ${signalList(rows)}
         </section>
@@ -155,38 +156,39 @@ function addExpenseView(mode) {
   const selectedChild = children.some((child) => child.id === state.data.preferences.lastSubcategoryId)
     ? state.data.preferences.lastSubcategoryId
     : children[0]?.id || "";
+  const today = localIsoDate();
   return `
     <section class="panel add-panel ${mode === "compact" ? "compact-panel" : ""}">
       <div class="panel-head">
-        <h2>${mode === "compact" ? "Quick Add" : "Add Expense"}</h2>
-        ${mode === "compact" ? `<button class="text-btn" data-view="add">Full form</button>` : ""}
+        <h2>${mode === "compact" ? "快速记账" : "记一笔支出"}</h2>
+        ${mode === "compact" ? `<button class="text-btn" data-view="add">完整表单</button>` : ""}
       </div>
       <form id="${mode}-expense-form" class="form-grid expense-form">
         <label>
-          <span>Amount</span>
+          <span>金额</span>
           <input name="amount" type="number" min="0.01" step="0.01" placeholder="0.00" required autofocus>
         </label>
-        <label>
-          <span>Date</span>
-          <input name="date" type="date" value="${localIsoDate()}" required>
+        <label class="default-date-field">
+          <span>日期</span>
+          <input name="date" type="date" value="${today}" data-default-date="today" required>
         </label>
         <label>
-          <span>Parent Category</span>
+          <span>一级分类</span>
           <select name="categoryId" data-child-target="${mode}-child-select" required>
             ${parents.map((category) => option(category.id, category.name, category.id === selectedParent)).join("")}
           </select>
         </label>
         <label>
-          <span>Child Category</span>
+          <span>二级分类</span>
           <select id="${mode}-child-select" name="subcategoryId" required>
             ${children.map((category) => option(category.id, category.name, category.id === selectedChild)).join("")}
           </select>
         </label>
         <label class="wide">
-          <span>Note</span>
-          <input name="note" type="text" placeholder="Optional note">
+          <span>备注</span>
+          <input name="note" type="text" placeholder="可选备注">
         </label>
-        <button class="primary-btn wide" type="submit">Save Expense</button>
+        <button class="primary-btn wide" type="submit">保存支出</button>
       </form>
     </section>
   `;
@@ -199,43 +201,43 @@ function categoriesView() {
     <section class="split-view">
       <div class="panel">
         <div class="panel-head">
-          <h2>Category Tree</h2>
+          <h2>分类树</h2>
         </div>
         <div class="category-tree">${parentCategories().map((parent) => categoryBranch(parent)).join("")}</div>
         <form id="parent-category-form" class="inline-form">
-          <input name="name" placeholder="New parent category" required>
-          <button type="submit">Add</button>
+          <input name="name" placeholder="新增一级分类" required>
+          <button type="submit">添加</button>
         </form>
       </div>
       <div class="panel detail-panel">
         <div class="panel-head">
-          <h2>${escapeHtml(selected?.name || "Category")}</h2>
-          <span>${selected?.parentId ? "Child category" : "Parent category"}</span>
+          <h2>${escapeHtml(selected?.name || "分类")}</h2>
+          <span>${selected?.parentId ? "二级分类" : "一级分类"}</span>
         </div>
         ${selected ? `
           <form id="rename-category-form" class="inline-form">
             <input name="name" value="${escapeAttr(selected.name)}" required>
-            <button type="submit">Rename</button>
-            <button type="button" class="danger-btn" data-disable-category="${selected.id}" ${selected.active ? "" : "disabled"}>Disable</button>
+            <button type="submit">重命名</button>
+            <button type="button" class="danger-btn" data-disable-category="${selected.id}" ${selected.active ? "" : "disabled"}>停用</button>
           </form>
           ${!selected.parentId ? `
             <form id="child-category-form" class="inline-form">
-              <input name="name" placeholder="New child category" required>
-              <button type="submit">Add child</button>
+              <input name="name" placeholder="新增二级分类" required>
+              <button type="submit">添加子类</button>
             </form>
           ` : ""}
           <section class="rule-section">
-            <h3>Budget Rules</h3>
-            <div class="rule-list">${rules.length ? rules.map(ruleItem).join("") : emptyState("No budget rules for this category.")}</div>
+            <h3>预算规则</h3>
+            <div class="rule-list">${rules.length ? rules.map(ruleItem).join("") : emptyState("该分类还没有预算规则。")}</div>
             <form id="budget-rule-form" class="inline-form rule-form">
               <select name="period">
-                <option value="weekly">Weekly</option>
-                <option value="monthly" selected>Monthly</option>
-                <option value="yearly">Yearly</option>
+                <option value="weekly">每周</option>
+                <option value="monthly" selected>每月</option>
+                <option value="yearly">每年</option>
               </select>
-              <input name="amount" type="number" min="0.01" step="0.01" placeholder="Budget amount" required>
-              <label class="check-label"><input name="active" type="checkbox" checked> Active</label>
-              <button type="submit">Save Rule</button>
+              <input name="amount" type="number" min="0.01" step="0.01" placeholder="预算金额" required>
+              <label class="check-label"><input name="active" type="checkbox" checked> 启用</label>
+              <button type="submit">保存规则</button>
             </form>
           </section>
         ` : ""}
@@ -251,8 +253,8 @@ function detailsView() {
     <section class="panel">
       <div class="panel-head">
         <div>
-          <h2>Details</h2>
-          <span>${expenses.length} matching expenses</span>
+          <h2>流水明细</h2>
+          <span>${expenses.length} 条匹配流水</span>
         </div>
       </div>
       <div class="filters">
@@ -260,20 +262,20 @@ function detailsView() {
           ${["weekly", "monthly", "yearly", "all"].map((period) => option(period, labelPeriod(period), period === state.detailsPeriod)).join("")}
         </select>
         <select id="details-parent">
-          <option value="all">All parent categories</option>
+          <option value="all">全部一级分类</option>
           ${parentCategories().map((category) => option(category.id, category.name, category.id === state.detailsParent)).join("")}
         </select>
         <select id="details-child">
-          <option value="all">All child categories</option>
+          <option value="all">全部二级分类</option>
           ${childCategories(state.detailsParent === "all" ? null : state.detailsParent).map((category) => option(category.id, category.name, category.id === state.detailsChild)).join("")}
         </select>
-        <input id="details-keyword" value="${escapeAttr(state.detailsKeyword)}" placeholder="Search notes or categories">
+        <input id="details-keyword" value="${escapeAttr(state.detailsKeyword)}" placeholder="搜索备注或分类">
       </div>
       ${editing ? editExpenseForm(editing) : ""}
       <div class="table-wrap">
         <table>
-          <thead><tr><th>Date</th><th>Amount</th><th>Category</th><th>Note</th><th></th></tr></thead>
-          <tbody>${expenses.length ? expenses.map(expenseRow).join("") : `<tr><td colspan="5">${emptyState("No expenses match the filters.")}</td></tr>`}</tbody>
+          <thead><tr><th>日期</th><th>金额</th><th>分类</th><th>备注</th><th></th></tr></thead>
+          <tbody>${expenses.length ? expenses.map(expenseRow).join("") : `<tr><td colspan="5">${emptyState("没有符合筛选条件的流水。")}</td></tr>`}</tbody>
         </table>
       </div>
     </section>
@@ -285,26 +287,26 @@ function importExportView() {
     <section class="split-view">
       <div class="panel">
         <div class="panel-head">
-          <h2>Export</h2>
+          <h2>导出</h2>
         </div>
         <div class="tool-list">
-          <button class="primary-btn" data-export-json>Export JSON Backup</button>
-          <button data-export-csv>Export Expense CSV</button>
-          <p>JSON backups preserve categories, budget rules, expenses, and preferences.</p>
+          <button class="primary-btn" data-export-json>导出 JSON 备份</button>
+          <button data-export-csv>导出 CSV 流水</button>
+          <p>JSON 备份会保留分类、预算规则、支出流水和偏好设置。</p>
         </div>
       </div>
       <div class="panel">
         <div class="panel-head">
-          <h2>Import</h2>
+          <h2>导入</h2>
         </div>
         <form id="import-form" class="import-form">
           <div class="segmented">
-            <button type="button" data-import-mode="overwrite" class="${state.importMode === "overwrite" ? "active" : ""}">Overwrite</button>
-            <button type="button" data-import-mode="merge" class="${state.importMode === "merge" ? "active" : ""}">Merge</button>
+            <button type="button" data-import-mode="overwrite" class="${state.importMode === "overwrite" ? "active" : ""}">覆盖</button>
+            <button type="button" data-import-mode="merge" class="${state.importMode === "merge" ? "active" : ""}">合并</button>
           </div>
           <input id="backup-file" type="file" accept="application/json,.json">
-          <textarea name="backup" rows="10" placeholder="Paste JSON backup here">${escapeHtml(state.importText)}</textarea>
-          <button class="primary-btn" type="submit">Import Backup</button>
+          <textarea name="backup" rows="10" placeholder="在这里粘贴 JSON 备份">${escapeHtml(state.importText)}</textarea>
+          <button class="primary-btn" type="submit">导入备份</button>
         </form>
       </div>
     </section>
@@ -312,6 +314,7 @@ function importExportView() {
 }
 
 function bindEvents() {
+  initializeExpenseFormDates();
   document.querySelectorAll("[data-view]").forEach((button) => {
     button.addEventListener("click", () => {
       state.view = button.dataset.view;
@@ -324,7 +327,7 @@ function bindEvents() {
     button.addEventListener("click", () => {
       state.overviewPeriod = button.dataset.period;
       state.data.preferences.overviewPeriod = button.dataset.period;
-      persist("Period updated");
+        persist("周期已更新");
     });
   });
   document.querySelectorAll(".expense-form").forEach((form) => {
@@ -339,7 +342,7 @@ function bindEvents() {
           subcategoryId: input.subcategoryId,
           note: input.note
         });
-        persist("Expense saved");
+        persist("支出已保存");
       } catch (error) {
         notify(error.message);
       }
@@ -351,6 +354,14 @@ function bindEvents() {
   bindCategoryEvents();
   bindDetailsEvents();
   bindImportExportEvents();
+}
+
+function initializeExpenseFormDates() {
+  const today = localIsoDate();
+  document.querySelectorAll('.expense-form input[name="date"][data-default-date="today"]').forEach((input) => {
+    input.defaultValue = today;
+    input.value = today;
+  });
 }
 
 function bindCategoryEvents() {
@@ -369,7 +380,7 @@ function bindCategoryEvents() {
     event.preventDefault();
     try {
       state.data = addCategory(state.data, { name: formData(event.currentTarget).name });
-      persist("Parent category added");
+      persist("一级分类已添加");
     } catch (error) {
       notify(error.message);
     }
@@ -378,7 +389,7 @@ function bindCategoryEvents() {
     event.preventDefault();
     try {
       state.data = addCategory(state.data, { name: formData(event.currentTarget).name, parentId: state.selectedCategoryId });
-      persist("Child category added");
+      persist("二级分类已添加");
     } catch (error) {
       notify(error.message);
     }
@@ -387,14 +398,14 @@ function bindCategoryEvents() {
     event.preventDefault();
     try {
       state.data = renameCategory(state.data, state.selectedCategoryId || parentCategories()[0].id, formData(event.currentTarget).name);
-      persist("Category renamed");
+      persist("分类已重命名");
     } catch (error) {
       notify(error.message);
     }
   });
   document.querySelector("[data-disable-category]")?.addEventListener("click", (event) => {
     state.data = disableCategory(state.data, event.currentTarget.dataset.disableCategory);
-    persist("Category disabled");
+    persist("分类已停用");
   });
   document.getElementById("budget-rule-form")?.addEventListener("submit", (event) => {
     event.preventDefault();
@@ -406,7 +417,7 @@ function bindCategoryEvents() {
         amount: Number(input.amount),
         active: Boolean(input.active)
       });
-      persist("Budget rule saved");
+      persist("预算规则已保存");
     } catch (error) {
       notify(error.message);
     }
@@ -414,7 +425,7 @@ function bindCategoryEvents() {
   document.querySelectorAll("[data-delete-rule]").forEach((button) => {
     button.addEventListener("click", () => {
       state.data = deleteBudgetRule(state.data, button.dataset.deleteRule);
-      persist("Budget rule deleted");
+      persist("预算规则已删除");
     });
   });
 }
@@ -455,7 +466,7 @@ function bindDetailsEvents() {
   document.querySelectorAll("[data-delete-expense]").forEach((button) => {
     button.addEventListener("click", () => {
       state.data = deleteExpense(state.data, button.dataset.deleteExpense);
-      persist("Expense deleted");
+      persist("支出已删除");
     });
   });
   document.getElementById("edit-expense-form")?.addEventListener("submit", (event) => {
@@ -470,7 +481,7 @@ function bindDetailsEvents() {
         note: input.note
       });
       state.editingExpenseId = null;
-      persist("Expense updated");
+      persist("支出已更新");
     } catch (error) {
       notify(error.message);
     }
@@ -478,8 +489,8 @@ function bindDetailsEvents() {
 }
 
 function bindImportExportEvents() {
-  document.querySelector("[data-export-json]")?.addEventListener("click", () => download("budget-ledger-backup.json", exportJson(state.data), "application/json"));
-  document.querySelector("[data-export-csv]")?.addEventListener("click", () => download("budget-ledger-expenses.csv", exportCsv(state.data), "text/csv"));
+  document.querySelector("[data-export-json]")?.addEventListener("click", () => download("记账备份.json", exportJson(state.data), "application/json"));
+  document.querySelector("[data-export-csv]")?.addEventListener("click", () => download("支出流水.csv", exportCsv(state.data), "text/csv"));
   document.querySelectorAll("[data-import-mode]").forEach((button) => {
     button.addEventListener("click", () => {
       state.importMode = button.dataset.importMode;
@@ -499,7 +510,7 @@ function bindImportExportEvents() {
     if (result.ok) {
       state.data = result.data;
       state.importText = "";
-      persist(`Backup imported with ${state.importMode}`);
+      persist(`备份已${state.importMode === "merge" ? "合并" : "覆盖"}导入`);
     } else {
       notify(result.error);
     }
@@ -517,26 +528,26 @@ function navButton(id, label, compact = false) {
 
 function budgetRow(row) {
   const pct = Math.min(100, Math.round(row.ratio * 100));
-  const tone = categoryTone(row.categoryName);
+  const tone = getCategoryTone(row.categoryId, row.categoryName);
   return `
     <button class="budget-row ${row.state}" data-filter-category="${row.categoryId}">
       <div class="budget-main">
-        <span class="category-orb ${tone}" aria-hidden="true">${categoryInitial(row.categoryName)}</span>
+        <span class="category-orb ${tone}" aria-hidden="true">${categoryIcon(row.categoryId, row.categoryName)}</span>
         <span>
           <strong>${escapeHtml(row.categoryName)}</strong>
-          <em>${labelPeriod(row.period)} rule</em>
+          <em>${labelPeriod(row.period)}规则</em>
         </span>
       </div>
       <div class="budget-cell">
-        <span>Spent</span>
+        <span>已支出</span>
         <b>${money(row.spent)}</b>
       </div>
       <div class="budget-cell">
-        <span>Budget</span>
+        <span>预算</span>
         <b>${money(row.amount)}</b>
       </div>
       <div class="budget-cell ${row.remaining < 0 ? "negative" : "positive"}">
-        <span>Remaining</span>
+        <span>剩余</span>
         <b>${money(row.remaining)}</b>
       </div>
       <div class="progress-cell">
@@ -547,25 +558,31 @@ function budgetRow(row) {
   `;
 }
 
-function metricCard(label, value, caption) {
+function metricCard(kind, label, value, caption) {
   return `
-    <div class="metric metric-${label.toLowerCase()}">
+    <div class="metric metric-${kind}">
       <div>
         <span>${label}</span>
         <strong>${value}</strong>
         <em>${caption}</em>
       </div>
-      <i class="metric-icon" aria-hidden="true"></i>
+      <i class="metric-icon" aria-hidden="true">${metricIcon(kind)}</i>
     </div>
   `;
 }
 
+function metricIcon(kind) {
+  return `<span class="metric-glyph metric-glyph-${escapeAttr(kind)}"></span>`;
+}
+
 function expenseItem(expense) {
-  const tone = categoryTone(categoryPath(expense));
+  const label = categoryPath(expense);
+  const iconCategoryId = expense.subcategoryId || expense.categoryId;
+  const tone = getCategoryTone(iconCategoryId, label);
   return `
     <div class="expense-item">
-      <span class="category-orb ${tone}" aria-hidden="true">${categoryInitial(categoryPath(expense))}</span>
-      <div><strong>${escapeHtml(categoryPath(expense))}</strong><span>${escapeHtml(expense.note || "No note")}</span></div>
+      <span class="category-orb ${tone}" aria-hidden="true">${categoryIcon(iconCategoryId, label)}</span>
+      <div><strong>${escapeHtml(label)}</strong><span>${escapeHtml(expense.note || "无备注")}</span></div>
       <div><b>${money(expense.amount)}</b><span>${expense.date}</span></div>
     </div>
   `;
@@ -579,8 +596,8 @@ function expenseRow(expense) {
       <td>${escapeHtml(categoryPath(expense))}</td>
       <td>${escapeHtml(expense.note || "")}</td>
       <td class="actions">
-        <button data-edit-expense="${expense.id}">Edit</button>
-        <button class="danger-btn" data-delete-expense="${expense.id}">Delete</button>
+        <button data-edit-expense="${expense.id}">编辑</button>
+        <button class="danger-btn" data-delete-expense="${expense.id}">删除</button>
       </td>
     </tr>
   `;
@@ -600,7 +617,7 @@ function editExpenseForm(expense) {
         ${children.map((category) => option(category.id, category.name, category.id === expense.subcategoryId)).join("")}
       </select>
       <input name="note" value="${escapeAttr(expense.note)}">
-      <button class="primary-btn" type="submit">Update</button>
+      <button class="primary-btn" type="submit">更新</button>
     </form>
   `;
 }
@@ -626,9 +643,9 @@ function categoryBranch(parent) {
 function ruleItem(rule) {
   return `
     <div class="rule-item">
-      <div><strong>${labelPeriod(rule.period)}</strong><span>${rule.active ? "Active" : "Paused"}</span></div>
+      <div><strong>${labelPeriod(rule.period)}</strong><span>${rule.active ? "启用中" : "已暂停"}</span></div>
       <b>${money(rule.amount)}</b>
-      <button class="danger-btn" data-delete-rule="${rule.id}">Delete</button>
+      <button class="danger-btn" data-delete-rule="${rule.id}">删除</button>
     </div>
   `;
 }
@@ -640,8 +657,8 @@ function signalList(rows) {
       <div class="signal signal-ok">
         <span class="signal-check" aria-hidden="true"></span>
         <div>
-          <strong>All budgets look healthy</strong>
-          <span>No categories near or over budget.</span>
+          <strong>预算状态良好</strong>
+          <span>暂无接近或超出预算的分类。</span>
         </div>
       </div>
     `;
@@ -649,7 +666,7 @@ function signalList(rows) {
   return `<div class="signal-list">${signals.map((row) => `
     <div class="signal ${row.state}">
       <strong>${escapeHtml(row.categoryName)}</strong>
-      <span>${row.state === "over" ? `${money(Math.abs(row.remaining))} over` : `${Math.round(row.ratio * 100)}% used`}</span>
+      <span>${row.state === "over" ? `超出 ${money(Math.abs(row.remaining))}` : `已用 ${Math.round(row.ratio * 100)}%`}</span>
     </div>
   `).join("")}</div>`;
 }
@@ -685,7 +702,13 @@ function childCategories(parentId) {
 function categoryPath(expense) {
   const parent = state.data.categories.find((category) => category.id === expense.categoryId);
   const child = state.data.categories.find((category) => category.id === expense.subcategoryId);
-  return `${parent?.name || "Unknown"} / ${child?.name || "Unknown"}`;
+  return `${parent?.name || "未知"} / ${child?.name || "未知"}`;
+}
+
+function categoryIcon(categoryId, label) {
+  const glyph = getCategoryGlyph(categoryId);
+  const text = glyph === "glyph-text" ? escapeHtml(getCategoryFallbackText(label)) : "";
+  return `<span class="category-glyph ${escapeAttr(glyph)}">${text}</span>`;
 }
 
 function persist(message) {
@@ -719,11 +742,11 @@ function money(value) {
 
 function rangeLabel(period, today) {
   const range = getPeriodRange(period, today);
-  return `${labelPeriod(period)} · ${range.start} to ${range.end}`;
+  return `${labelPeriod(period)}：${range.start} 至 ${range.end}`;
 }
 
 function labelPeriod(period) {
-  return ({ weekly: "Weekly", monthly: "Monthly", yearly: "Yearly", all: "All time" })[period] || period;
+  return ({ weekly: "每周", monthly: "每月", yearly: "每年", all: "全部时间" })[period] || period;
 }
 
 function localIsoDate() {
@@ -745,21 +768,7 @@ function selectedClass(id) {
 }
 
 function shortLabel(label) {
-  return label.replace("Categories & Budgets", "Budgets").replace("Import & Export", "Import");
-}
-
-function categoryTone(value) {
-  const text = value.toLowerCase();
-  if (text.includes("food") || text.includes("takeout") || text.includes("groceries")) return "tone-mint";
-  if (text.includes("transport") || text.includes("subway") || text.includes("taxi")) return "tone-blue";
-  if (text.includes("entertainment") || text.includes("movies")) return "tone-amber";
-  if (text.includes("health") || text.includes("medicine")) return "tone-rose";
-  if (text.includes("learning") || text.includes("books")) return "tone-violet";
-  return "tone-gray";
-}
-
-function categoryInitial(value) {
-  return String(value || "?").replace(/[^a-zA-Z]/g, "").slice(0, 1).toUpperCase() || "?";
+  return label.replace("分类与预算", "预算").replace("导入导出", "导入");
 }
 
 function escapeHtml(value) {

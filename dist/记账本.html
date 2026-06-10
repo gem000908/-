@@ -1,0 +1,2729 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>每日记账</title>
+    <style>
+* {
+  box-sizing: border-box;
+}
+
+:root {
+  color-scheme: light;
+  --bg: #f4f7f8;
+  --surface: #ffffff;
+  --surface-raised: #fbfcfd;
+  --surface-muted: #eef2f5;
+  --text: #111a21;
+  --muted: #62717c;
+  --muted-2: #87929a;
+  --border: #d9e0e6;
+  --border-strong: #c5ced6;
+  --accent: #079a94;
+  --accent-strong: #047d78;
+  --accent-soft: #e2f6f3;
+  --blue: #2f6ff2;
+  --blue-soft: #eaf1ff;
+  --teal: #079a94;
+  --teal-soft: #e1f6f2;
+  --amber: #c98716;
+  --amber-soft: #fff5de;
+  --red: #c83e4d;
+  --red-soft: #fdecef;
+  --shadow: 0 18px 44px rgba(20, 32, 42, 0.08);
+  --shadow-soft: 0 8px 22px rgba(20, 32, 42, 0.05);
+  --radius: 8px;
+}
+
+html {
+  background: var(--bg);
+}
+
+body {
+  margin: 0;
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  background:
+    radial-gradient(circle at 80% 0%, rgba(7, 154, 148, 0.08), transparent 260px),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.88), rgba(255, 255, 255, 0) 300px),
+    var(--bg);
+  color: var(--text);
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+button {
+  min-height: 36px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+  color: var(--text);
+  padding: 0 12px;
+  cursor: pointer;
+  transition: border-color 150ms ease, background 150ms ease, color 150ms ease, box-shadow 150ms ease, transform 150ms ease;
+}
+
+button:hover {
+  border-color: var(--border-strong);
+  background: var(--surface-raised);
+}
+
+button:focus-visible,
+input:focus,
+select:focus,
+textarea:focus {
+  outline: 0;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.14);
+}
+
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.52;
+}
+
+input,
+select,
+textarea {
+  width: 100%;
+  min-height: 40px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+  color: var(--text);
+  padding: 9px 11px;
+  transition: border-color 150ms ease, box-shadow 150ms ease, background 150ms ease;
+}
+
+textarea {
+  resize: vertical;
+}
+
+h1,
+h2,
+h3,
+p {
+  margin: 0;
+}
+
+h1 {
+  font-size: 30px;
+  line-height: 1.12;
+  font-weight: 780;
+}
+
+h2 {
+  font-size: 16px;
+  line-height: 1.25;
+  font-weight: 740;
+}
+
+h3 {
+  font-size: 14px;
+  font-weight: 740;
+}
+
+.shell {
+  min-height: 100vh;
+  display: grid;
+  grid-template-columns: 220px minmax(0, 1fr);
+}
+
+.sidebar {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  padding: 22px 14px 18px;
+  border-right: 1px solid var(--border);
+  background: rgba(255, 255, 255, 0.88);
+  backdrop-filter: blur(14px);
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.brand {
+  min-height: 42px;
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  padding: 0 2px;
+}
+
+.brand-mark {
+  width: 34px;
+  height: 34px;
+  border-radius: 9px;
+  display: grid;
+  place-items: center;
+  background: linear-gradient(180deg, #10aaa2, #07847f);
+  color: #fff;
+  font-size: 17px;
+  font-weight: 800;
+  box-shadow: 0 10px 18px rgba(7, 154, 148, 0.24);
+}
+
+.brand strong {
+  display: block;
+  font-size: 14px;
+  line-height: 1.2;
+  font-weight: 760;
+}
+
+.brand span,
+.sidebar-footer span,
+.panel-head span,
+.metric em,
+.expense-item span,
+.rule-item span {
+  display: block;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.35;
+  font-style: normal;
+}
+
+.nav-list {
+  display: grid;
+  gap: 5px;
+}
+
+.nav-btn {
+  min-height: 40px;
+  width: 100%;
+  justify-content: flex-start;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border-color: transparent;
+  background: transparent;
+  color: #27343d;
+  font-size: 14px;
+  text-align: left;
+}
+
+.nav-btn em {
+  font-style: normal;
+  line-height: 1.2;
+}
+
+.nav-icon {
+  width: 24px;
+  height: 24px;
+  border-radius: 7px;
+  display: grid;
+  place-items: center;
+  flex: 0 0 24px;
+  background: var(--surface-muted);
+  color: var(--muted);
+  position: relative;
+}
+
+.nav-icon::before,
+.nav-icon::after {
+  content: "";
+  display: block;
+  position: absolute;
+}
+
+.icon-overview::before {
+  width: 11px;
+  height: 8px;
+  border: 2px solid currentColor;
+  border-top: 0;
+  border-radius: 2px;
+  bottom: 6px;
+}
+
+.icon-overview::after {
+  width: 9px;
+  height: 9px;
+  border-left: 2px solid currentColor;
+  border-top: 2px solid currentColor;
+  transform: rotate(45deg);
+  top: 5px;
+}
+
+.icon-add::before,
+.icon-add::after {
+  width: 12px;
+  height: 2px;
+  border-radius: 2px;
+  background: currentColor;
+}
+
+.icon-add::after {
+  transform: rotate(90deg);
+}
+
+.icon-categories::before {
+  width: 12px;
+  height: 12px;
+  border: 2px solid currentColor;
+  border-radius: 3px;
+}
+
+.icon-details::before {
+  width: 13px;
+  height: 10px;
+  border-top: 2px solid currentColor;
+  border-bottom: 2px solid currentColor;
+}
+
+.icon-details::after {
+  width: 13px;
+  height: 2px;
+  background: currentColor;
+}
+
+.icon-import::before {
+  width: 12px;
+  height: 12px;
+  border-left: 2px solid currentColor;
+  border-bottom: 2px solid currentColor;
+  transform: rotate(-45deg);
+  top: 5px;
+}
+
+.icon-import::after {
+  width: 2px;
+  height: 12px;
+  background: currentColor;
+  top: 6px;
+}
+
+.nav-btn:hover {
+  background: #f6f8fa;
+}
+
+.nav-btn.active {
+  border-color: #a9dcd6;
+  background: var(--accent-soft);
+  color: var(--accent);
+  box-shadow: inset 0 0 0 1px rgba(7, 154, 148, 0.06);
+}
+
+.nav-btn.active .nav-icon {
+  background: var(--accent);
+  color: #fff;
+}
+
+.sidebar-footer {
+  margin-top: auto;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 13px;
+  background: linear-gradient(180deg, #ffffff, #f4f7fa);
+  box-shadow: var(--shadow-soft);
+}
+
+.sidebar-footer strong {
+  display: block;
+  margin-top: 4px;
+  font-size: 14px;
+}
+
+.content {
+  min-width: 0;
+  padding: 24px;
+}
+
+.view-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 340px;
+  gap: 18px;
+  align-items: start;
+}
+
+.main-column,
+.right-column {
+  display: grid;
+  gap: 18px;
+  align-content: start;
+}
+
+.page-head,
+.panel-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.page-head {
+  min-height: 48px;
+}
+
+.page-head p {
+  color: var(--muted);
+  font-size: 13px;
+  margin-top: 6px;
+}
+
+.segmented {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 3px;
+  background: rgba(255, 255, 255, 0.82);
+  box-shadow: var(--shadow-soft);
+}
+
+.segmented button {
+  min-height: 30px;
+  border: 0;
+  border-radius: 6px;
+  padding: 0 12px;
+  font-size: 13px;
+  background: transparent;
+}
+
+.segmented button.active {
+  background: var(--accent);
+  color: #fff;
+  box-shadow: 0 7px 14px rgba(7, 154, 148, 0.24);
+}
+
+.metric-row {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.metric,
+.panel {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: rgba(255, 255, 255, 0.94);
+  box-shadow: var(--shadow);
+}
+
+.metric {
+  min-height: 104px;
+  padding: 18px 16px;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.metric::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  background: var(--blue);
+  opacity: 0.82;
+}
+
+.metric-remaining::before {
+  background: var(--accent);
+}
+
+.metric-budgeted::before {
+  background: #7c5fd6;
+}
+
+.metric span {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.metric strong {
+  display: block;
+  margin: 9px 0 5px;
+  font-size: 25px;
+  line-height: 1;
+  font-weight: 780;
+}
+
+.metric-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 999px;
+  display: grid;
+  place-items: center;
+  flex: 0 0 44px;
+  background: var(--blue-soft);
+  color: var(--blue);
+  font-style: normal;
+  line-height: 1;
+  position: relative;
+}
+
+.metric-remaining .metric-icon {
+  background: var(--teal-soft);
+  color: var(--accent);
+}
+
+.metric-budgeted .metric-icon {
+  background: #eeeafe;
+  color: #6747c7;
+}
+
+.metric-icon::before,
+.metric-icon::after {
+  content: none;
+}
+
+.metric-glyph,
+.category-glyph {
+  width: 21px;
+  height: 21px;
+  display: block;
+  position: relative;
+  color: currentColor;
+}
+
+.metric-glyph::before,
+.metric-glyph::after,
+.category-glyph::before,
+.category-glyph::after {
+  content: "";
+  position: absolute;
+  box-sizing: border-box;
+}
+
+.metric-glyph-spent::before {
+  left: 4px;
+  top: 3px;
+  width: 13px;
+  height: 15px;
+  border: 2px solid currentColor;
+  border-radius: 3px;
+}
+
+.metric-glyph-spent::after {
+  left: 8px;
+  top: 7px;
+  width: 5px;
+  height: 8px;
+  border-left: 2px solid currentColor;
+  border-bottom: 2px solid currentColor;
+  transform: rotate(-45deg);
+}
+
+.metric-glyph-remaining::before {
+  left: 2px;
+  top: 6px;
+  width: 17px;
+  height: 11px;
+  border: 2px solid currentColor;
+  border-radius: 4px;
+}
+
+.metric-glyph-remaining::after {
+  right: 5px;
+  top: 10px;
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.metric-glyph-budgeted::before {
+  left: 4px;
+  bottom: 4px;
+  width: 3px;
+  height: 8px;
+  background: currentColor;
+  box-shadow: 6px -4px 0 currentColor, 12px -8px 0 currentColor;
+}
+
+.metric-glyph-budgeted::after {
+  left: 2px;
+  bottom: 3px;
+  width: 17px;
+  height: 2px;
+  background: currentColor;
+}
+
+.metric-spent .metric-icon::before {
+  width: 18px;
+  height: 12px;
+  border-left: 3px solid currentColor;
+  border-bottom: 3px solid currentColor;
+  transform: rotate(-45deg);
+}
+
+.metric-remaining .metric-icon::before {
+  width: 18px;
+  height: 14px;
+  border: 3px solid currentColor;
+  border-radius: 4px;
+}
+
+.metric-remaining .metric-icon::after {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: currentColor;
+  right: 13px;
+}
+
+.metric-budgeted .metric-icon::before {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: conic-gradient(currentColor 0 74%, transparent 74% 100%);
+}
+
+.panel {
+  padding: 16px;
+}
+
+.budget-list,
+.recent-list,
+.signal-list,
+.rule-list,
+.tool-list {
+  display: grid;
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.budget-header {
+  display: grid;
+  grid-template-columns: minmax(132px, 1.25fr) minmax(88px, 0.7fr) minmax(88px, 0.7fr) minmax(96px, 0.8fr) minmax(120px, 1fr) 48px;
+  gap: 12px;
+  margin-top: 18px;
+  padding: 0 12px 8px;
+  color: var(--muted);
+  font-size: 12px;
+  border-bottom: 1px solid var(--border);
+}
+
+.budget-row {
+  width: 100%;
+  min-height: 66px;
+  display: grid;
+  grid-template-columns: minmax(132px, 1.25fr) minmax(88px, 0.7fr) minmax(88px, 0.7fr) minmax(96px, 0.8fr) minmax(120px, 1fr) 48px;
+  align-items: center;
+  gap: 12px;
+  text-align: left;
+  background: rgba(255, 255, 255, 0.88);
+  border-color: transparent;
+  border-radius: 0;
+  border-bottom-color: var(--border);
+  box-shadow: none;
+}
+
+.budget-row:hover {
+  border-color: var(--border-strong);
+  background: #fbfefd;
+  border-radius: var(--radius);
+  transform: translateY(-1px);
+}
+
+.budget-row strong,
+.budget-row span {
+  display: block;
+}
+
+.budget-row .category-orb,
+.expense-item .category-orb {
+  display: inline-grid;
+}
+
+.budget-main strong {
+  font-size: 15px;
+}
+
+.budget-main {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.budget-main em,
+.budget-cell span {
+  margin-top: 4px;
+  color: var(--muted);
+  font-size: 11px;
+  font-style: normal;
+}
+
+.budget-cell b {
+  font-size: 13px;
+  font-weight: 680;
+}
+
+.budget-cell.positive b {
+  color: var(--teal);
+}
+
+.budget-cell.negative b {
+  color: var(--red);
+}
+
+.progress-cell {
+  min-width: 0;
+}
+
+.budget-percent {
+  text-align: right;
+  font-size: 13px;
+  font-weight: 760;
+}
+
+.budget-row.near {
+  background: var(--amber-soft);
+  border-color: #f0d19a;
+}
+
+.budget-row.over {
+  background: var(--red-soft);
+  border-color: #edb3bb;
+}
+
+.progress {
+  height: 8px;
+  border-radius: 999px;
+  overflow: hidden;
+  background: #e5ebef;
+}
+
+.progress i {
+  display: block;
+  height: 100%;
+  min-width: 6px;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #10b8a9, var(--teal));
+}
+
+.budget-row.near .progress i {
+  background: linear-gradient(90deg, #f2a51d, var(--amber));
+}
+
+.budget-row.over .progress i {
+  background: linear-gradient(90deg, #ef5060, var(--red));
+}
+
+.expense-item,
+.rule-item,
+.signal {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  min-height: 52px;
+  padding: 11px 12px;
+  background: #fff;
+}
+
+.expense-item {
+  justify-content: flex-start;
+}
+
+.expense-item div:first-of-type {
+  flex: 1;
+}
+
+.expense-item div:last-child {
+  text-align: right;
+  margin-left: auto;
+}
+
+.expense-item strong,
+.rule-item strong,
+.signal strong {
+  font-size: 14px;
+}
+
+.signal {
+  background: var(--surface-muted);
+}
+
+.signal-ok {
+  justify-content: flex-start;
+}
+
+.signal-ok div {
+  display: grid;
+  gap: 3px;
+}
+
+.signal-ok strong {
+  display: block;
+}
+
+.signal-check {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 2px solid var(--accent);
+  flex: 0 0 28px;
+  position: relative;
+}
+
+.signal-check::before {
+  content: "";
+  position: absolute;
+  width: 10px;
+  height: 6px;
+  border-left: 2px solid var(--accent);
+  border-bottom: 2px solid var(--accent);
+  transform: rotate(-45deg);
+  left: 7px;
+  top: 8px;
+}
+
+.signal.near {
+  background: var(--amber-soft);
+  border-color: #f0d19a;
+}
+
+.signal.over {
+  background: var(--red-soft);
+  border-color: #edb3bb;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 14px;
+}
+
+label span {
+  display: block;
+  margin-bottom: 6px;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.wide {
+  grid-column: 1 / -1;
+}
+
+.compact-panel .default-date-field {
+  grid-column: 1 / -1;
+}
+
+.primary-btn {
+  background: linear-gradient(180deg, #10aaa2, var(--accent));
+  border-color: var(--accent);
+  color: #fff;
+  font-weight: 740;
+  box-shadow: 0 10px 20px rgba(7, 154, 148, 0.22);
+}
+
+.primary-btn:hover {
+  background: linear-gradient(180deg, #0b9992, var(--accent-strong));
+  border-color: var(--accent-strong);
+}
+
+.danger-btn {
+  color: var(--red);
+  border-color: #efc2c8;
+}
+
+.text-btn {
+  border: 0;
+  min-height: 28px;
+  background: transparent;
+  color: var(--accent);
+  padding: 0;
+  font-weight: 650;
+}
+
+.notice {
+  margin-bottom: 14px;
+  border: 1px solid #aad6cb;
+  background: var(--teal-soft);
+  color: #0d6d61;
+  border-radius: var(--radius);
+  padding: 10px 12px;
+  font-size: 13px;
+}
+
+.empty {
+  color: var(--muted);
+  font-size: 13px;
+  padding: 14px;
+  border: 1px dashed var(--border);
+  border-radius: var(--radius);
+  background: #f6f8fa;
+}
+
+.split-view {
+  display: grid;
+  grid-template-columns: 360px minmax(0, 1fr);
+  gap: 18px;
+}
+
+.category-tree {
+  display: grid;
+  gap: 8px;
+  margin-top: 14px;
+}
+
+.branch {
+  display: grid;
+  gap: 6px;
+}
+
+.children {
+  display: grid;
+  gap: 5px;
+  padding-left: 24px;
+}
+
+.category-node {
+  min-height: 40px;
+  justify-content: flex-start;
+  text-align: left;
+  border-color: transparent;
+  background: var(--surface-muted);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.category-node:hover {
+  background: #e8edf2;
+}
+
+.category-node.parent {
+  font-weight: 740;
+}
+
+.category-node.selected {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+  color: var(--accent-strong);
+}
+
+.category-orb {
+  width: 36px;
+  height: 36px;
+  border-radius: 999px;
+  display: inline-grid;
+  place-items: center;
+  flex: 0 0 36px;
+  font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-size: 13px;
+  font-weight: 760;
+  line-height: 1;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.7), 0 5px 12px rgba(20, 32, 42, 0.08);
+}
+
+.glyph-text {
+  display: grid;
+  place-items: center;
+}
+
+.glyph-food::before {
+  left: 4px;
+  top: 10px;
+  width: 13px;
+  height: 7px;
+  border: 2px solid currentColor;
+  border-top: 0;
+  border-radius: 0 0 9px 9px;
+}
+
+.glyph-food::after {
+  left: 6px;
+  top: 5px;
+  width: 12px;
+  height: 2px;
+  background: currentColor;
+  transform: rotate(-24deg);
+  transform-origin: left center;
+}
+
+.glyph-takeout::before {
+  left: 4px;
+  top: 6px;
+  width: 13px;
+  height: 12px;
+  border: 2px solid currentColor;
+  border-radius: 3px;
+}
+
+.glyph-takeout::after {
+  left: 6px;
+  top: 4px;
+  width: 9px;
+  height: 5px;
+  border: 2px solid currentColor;
+  border-bottom: 0;
+  border-radius: 3px 3px 0 0;
+}
+
+.glyph-basket::before,
+.glyph-bag::before {
+  left: 4px;
+  top: 8px;
+  width: 14px;
+  height: 10px;
+  border: 2px solid currentColor;
+  border-radius: 3px;
+}
+
+.glyph-basket::after,
+.glyph-bag::after {
+  left: 7px;
+  top: 4px;
+  width: 8px;
+  height: 7px;
+  border: 2px solid currentColor;
+  border-bottom: 0;
+  border-radius: 8px 8px 0 0;
+}
+
+.glyph-route::before {
+  left: 4px;
+  top: 5px;
+  width: 13px;
+  height: 12px;
+  border-left: 2px solid currentColor;
+  border-bottom: 2px solid currentColor;
+  border-radius: 0 0 0 7px;
+}
+
+.glyph-route::after {
+  left: 3px;
+  top: 4px;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: currentColor;
+  box-shadow: 11px 11px 0 currentColor;
+}
+
+.glyph-bus::before,
+.glyph-car::before {
+  left: 3px;
+  top: 7px;
+  width: 15px;
+  height: 9px;
+  border: 2px solid currentColor;
+  border-radius: 4px;
+}
+
+.glyph-bus::after,
+.glyph-car::after {
+  left: 6px;
+  top: 15px;
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: currentColor;
+  box-shadow: 8px 0 0 currentColor;
+}
+
+.glyph-bottle::before {
+  left: 7px;
+  top: 5px;
+  width: 8px;
+  height: 14px;
+  border: 2px solid currentColor;
+  border-radius: 3px 3px 5px 5px;
+}
+
+.glyph-bottle::after {
+  left: 8px;
+  top: 2px;
+  width: 6px;
+  height: 5px;
+  border: 2px solid currentColor;
+  border-bottom: 0;
+  border-radius: 2px 2px 0 0;
+}
+
+.glyph-home::before {
+  left: 5px;
+  top: 9px;
+  width: 12px;
+  height: 9px;
+  border: 2px solid currentColor;
+  border-top: 0;
+  border-radius: 0 0 3px 3px;
+}
+
+.glyph-home::after {
+  left: 5px;
+  top: 5px;
+  width: 11px;
+  height: 11px;
+  border-left: 2px solid currentColor;
+  border-top: 2px solid currentColor;
+  transform: rotate(45deg);
+}
+
+.glyph-key::before {
+  left: 3px;
+  top: 6px;
+  width: 8px;
+  height: 8px;
+  border: 2px solid currentColor;
+  border-radius: 50%;
+}
+
+.glyph-key::after {
+  left: 10px;
+  top: 10px;
+  width: 9px;
+  height: 2px;
+  background: currentColor;
+  box-shadow: 5px 3px 0 currentColor;
+}
+
+.glyph-play::before {
+  left: 7px;
+  top: 4px;
+  width: 0;
+  height: 0;
+  border-top: 7px solid transparent;
+  border-bottom: 7px solid transparent;
+  border-left: 11px solid currentColor;
+}
+
+.glyph-ticket::before {
+  left: 3px;
+  top: 6px;
+  width: 15px;
+  height: 10px;
+  border: 2px solid currentColor;
+  border-radius: 3px;
+}
+
+.glyph-ticket::after {
+  left: 9px;
+  top: 7px;
+  width: 2px;
+  height: 8px;
+  background: currentColor;
+  opacity: 0.55;
+}
+
+.glyph-cross::before {
+  left: 9px;
+  top: 4px;
+  width: 3px;
+  height: 13px;
+  background: currentColor;
+  border-radius: 2px;
+}
+
+.glyph-cross::after {
+  left: 4px;
+  top: 9px;
+  width: 13px;
+  height: 3px;
+  background: currentColor;
+  border-radius: 2px;
+}
+
+.glyph-pill::before {
+  left: 3px;
+  top: 7px;
+  width: 15px;
+  height: 8px;
+  border: 2px solid currentColor;
+  border-radius: 999px;
+  transform: rotate(-28deg);
+}
+
+.glyph-pill::after {
+  left: 10px;
+  top: 6px;
+  width: 2px;
+  height: 10px;
+  background: currentColor;
+  transform: rotate(-28deg);
+}
+
+.glyph-book::before,
+.glyph-pages::before {
+  left: 4px;
+  top: 5px;
+  width: 13px;
+  height: 13px;
+  border: 2px solid currentColor;
+  border-radius: 2px;
+}
+
+.glyph-book::after,
+.glyph-pages::after {
+  left: 10px;
+  top: 5px;
+  width: 2px;
+  height: 13px;
+  background: currentColor;
+  opacity: 0.65;
+}
+
+.tone-mint {
+  color: #047d78;
+  background: #dff7f1;
+}
+
+.tone-blue {
+  color: #2563eb;
+  background: #e7efff;
+}
+
+.tone-amber {
+  color: #b7791f;
+  background: #fff0ce;
+}
+
+.tone-rose {
+  color: #c43b46;
+  background: #fde7eb;
+}
+
+.tone-violet {
+  color: #6747c7;
+  background: #eeeafe;
+}
+
+.tone-gray {
+  color: #66727a;
+  background: #eef2f5;
+}
+
+.tree-toggle {
+  width: 18px;
+  height: 18px;
+  border-radius: 5px;
+  display: inline-grid;
+  place-items: center;
+  background: #fff;
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1;
+  flex: 0 0 18px;
+}
+
+.category-node.selected .tree-toggle {
+  color: var(--accent);
+}
+
+.category-node.muted {
+  color: var(--muted);
+  text-decoration: line-through;
+}
+
+.inline-form,
+.edit-form,
+.filters {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 10px;
+  margin-top: 14px;
+  align-items: center;
+}
+
+.rule-form,
+.filters,
+.edit-form {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.edit-form {
+  grid-template-columns: 120px 150px 180px 180px minmax(140px, 1fr) auto;
+  margin-bottom: 12px;
+}
+
+.check-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.check-label input {
+  width: auto;
+  min-height: 0;
+}
+
+.rule-section {
+  margin-top: 22px;
+}
+
+.table-wrap {
+  overflow-x: auto;
+  margin-top: 14px;
+}
+
+table {
+  width: 100%;
+  min-width: 720px;
+  border-collapse: collapse;
+}
+
+th,
+td {
+  text-align: left;
+  border-bottom: 1px solid var(--border);
+  padding: 12px 8px;
+  font-size: 13px;
+}
+
+th {
+  color: var(--muted);
+  font-weight: 740;
+  background: #fbfcfd;
+}
+
+tbody tr:hover {
+  background: #fbfcfd;
+}
+
+.actions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+.import-form {
+  display: grid;
+  gap: 12px;
+  margin-top: 14px;
+}
+
+.tool-list p {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.bottom-nav {
+  display: none;
+}
+
+@media (max-width: 1120px) {
+  .view-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .right-column {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 980px) {
+  .shell {
+    display: block;
+    padding-bottom: 70px;
+  }
+
+  .sidebar {
+    display: none;
+  }
+
+  .content {
+    padding: 16px;
+  }
+
+  .split-view {
+    grid-template-columns: 1fr;
+  }
+
+  .metric-row,
+  .right-column {
+    grid-template-columns: 1fr;
+  }
+
+  .bottom-nav {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 66px;
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 4px;
+    padding: 7px 8px;
+    border-top: 1px solid var(--border);
+    background: rgba(255, 255, 255, 0.96);
+    backdrop-filter: blur(12px);
+    z-index: 20;
+  }
+
+  .bottom-nav .nav-btn {
+    min-height: 50px;
+    justify-content: center;
+    flex-direction: column;
+    gap: 3px;
+    font-size: 11px;
+    padding: 0;
+  }
+
+  .bottom-nav .nav-icon {
+    width: 22px;
+    height: 22px;
+    background: transparent;
+  }
+}
+
+@media (max-width: 760px) {
+  h1 {
+    font-size: 24px;
+  }
+
+  .page-head,
+  .panel-head {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .segmented {
+    width: 100%;
+  }
+
+  .segmented button {
+    flex: 1;
+  }
+
+  .form-grid,
+  .inline-form,
+  .rule-form,
+  .filters,
+  .edit-form {
+    grid-template-columns: 1fr;
+  }
+
+  .budget-row {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
+  .budget-header {
+    display: none;
+  }
+
+  .budget-cell {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+  }
+
+  .budget-cell span {
+    margin: 0;
+  }
+
+  .budget-percent {
+    text-align: left;
+  }
+
+  .actions {
+    justify-content: flex-start;
+  }
+}
+
+</style>
+  </head>
+  <body>
+    <div id="app"></div>
+    <script type="module">
+function getPeriodRange(period, today = isoToday()) {
+  const date = parseIsoDate(today);
+  if (period === "weekly") return weeklyRange(date);
+  if (period === "monthly") return monthlyRange(date);
+  if (period === "yearly") return yearlyRange(date);
+  throw new Error(`Unsupported period: ${period}`);
+}
+function isDateInPeriod(date, period, today = isoToday()) {
+  const range = getPeriodRange(period, today);
+  return date >= range.start && date <= range.end;
+}
+function isoToday(now = new Date()) {
+  return formatDate(new Date(Date.UTC(now.getFullYear(), now.getMonth(), now.getDate())));
+}
+
+function weeklyRange(date) {
+  const day = date.getUTCDay();
+  const offsetFromMonday = (day + 6) % 7;
+  const start = addDays(date, -offsetFromMonday);
+  const end = addDays(start, 6);
+  return { start: formatDate(start), end: formatDate(end) };
+}
+
+function monthlyRange(date) {
+  const start = new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), 1));
+  const end = new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth() + 1, 0));
+  return { start: formatDate(start), end: formatDate(end) };
+}
+
+function yearlyRange(date) {
+  const year = date.getUTCFullYear();
+  return { start: `${year}-01-01`, end: `${year}-12-31` };
+}
+
+function parseIsoDate(value) {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) {
+    throw new Error(`Invalid ISO date: ${value}`);
+  }
+  const date = new Date(`${value}T00:00:00.000Z`);
+  if (Number.isNaN(date.getTime())) {
+    throw new Error(`Invalid ISO date: ${value}`);
+  }
+  return date;
+}
+
+function addDays(date, days) {
+  const copy = new Date(date);
+  copy.setUTCDate(copy.getUTCDate() + days);
+  return copy;
+}
+
+function formatDate(date) {
+  return date.toISOString().slice(0, 10);
+}
+
+
+function getBudgetRows({ categories, expenses, budgetRules, period, today }) {
+  const activeRules = budgetRules.filter((rule) => rule.active && rule.period === period);
+  return activeRules.map((rule) => {
+    const category = categories.find((item) => item.id === rule.categoryId);
+    const spent = sumForCategory({ categories, expenses, categoryId: rule.categoryId, period, today });
+    const ratio = rule.amount > 0 ? spent / rule.amount : 0;
+    return {
+      ruleId: rule.id,
+      categoryId: rule.categoryId,
+      categoryName: categoryLabel(categories, category),
+      period,
+      amount: rule.amount,
+      spent,
+      remaining: rule.amount - spent,
+      ratio,
+      state: budgetState(ratio)
+    };
+  });
+}
+function getOverviewTotals(input) {
+  const rows = getBudgetRows(input);
+  const spent = roundMoney(rows.reduce((sum, row) => sum + row.spent, 0));
+  const budgeted = roundMoney(rows.reduce((sum, row) => sum + row.amount, 0));
+  const remaining = roundMoney(budgeted - spent);
+  return {
+    spent,
+    budgeted,
+    remaining,
+    overage: Math.max(0, roundMoney(spent - budgeted))
+  };
+}
+function categoryLabel(categories, category) {
+  if (!category) return "未知";
+  if (!category.parentId) return category.name;
+  const parent = categories.find((item) => item.id === category.parentId);
+  return `${parent?.name || "未知"} / ${category.name}`;
+}
+function sumForCategory({ categories, expenses, categoryId, period, today }) {
+  const category = categories.find((item) => item.id === categoryId);
+  if (!category) return 0;
+  return roundMoney(expenses
+    .filter((expense) => isDateInPeriod(expense.date, period, today))
+    .filter((expense) => {
+      if (category.parentId) return expense.subcategoryId === category.id;
+      const childIds = categories.filter((item) => item.parentId === category.id).map((item) => item.id);
+      return expense.categoryId === category.id || childIds.includes(expense.subcategoryId);
+    })
+    .reduce((sum, expense) => sum + Number(expense.amount || 0), 0));
+}
+
+function budgetState(ratio) {
+  if (ratio >= 1) return "over";
+  if (ratio >= 0.8) return "near";
+  return "normal";
+}
+
+function roundMoney(value) {
+  return Math.round((value + Number.EPSILON) * 100) / 100;
+}
+
+
+const categoryDisplay = new Map([
+  ["food", { glyph: "glyph-food", tone: "tone-mint" }],
+  ["takeout", { glyph: "glyph-takeout", tone: "tone-mint" }],
+  ["groceries", { glyph: "glyph-basket", tone: "tone-mint" }],
+  ["transport", { glyph: "glyph-route", tone: "tone-blue" }],
+  ["subway", { glyph: "glyph-bus", tone: "tone-blue" }],
+  ["taxi", { glyph: "glyph-car", tone: "tone-blue" }],
+  ["shopping", { glyph: "glyph-bag", tone: "tone-violet" }],
+  ["daily-goods", { glyph: "glyph-bottle", tone: "tone-violet" }],
+  ["housing", { glyph: "glyph-home", tone: "tone-blue" }],
+  ["rent", { glyph: "glyph-key", tone: "tone-blue" }],
+  ["entertainment", { glyph: "glyph-play", tone: "tone-amber" }],
+  ["movies", { glyph: "glyph-ticket", tone: "tone-amber" }],
+  ["health", { glyph: "glyph-cross", tone: "tone-rose" }],
+  ["medicine", { glyph: "glyph-pill", tone: "tone-rose" }],
+  ["learning", { glyph: "glyph-book", tone: "tone-violet" }],
+  ["books", { glyph: "glyph-pages", tone: "tone-violet" }]
+]);
+
+const toneKeywords = [
+  { tone: "tone-mint", words: ["餐", "外卖", "菜", "超市", "food", "takeout", "groceries"] },
+  { tone: "tone-blue", words: ["交通", "地铁", "公交", "打车", "房", "租", "transport", "subway", "taxi", "housing", "rent"] },
+  { tone: "tone-amber", words: ["娱乐", "电影", "演出", "entertainment", "movies"] },
+  { tone: "tone-rose", words: ["健康", "医疗", "药", "health", "medicine"] },
+  { tone: "tone-violet", words: ["学习", "书", "课程", "购物", "日用", "learning", "books", "shopping", "daily goods"] }
+];
+function getCategoryGlyph(categoryId) {
+  const known = categoryDisplay.get(categoryId);
+  return known?.glyph || "glyph-text";
+}
+function getCategoryFallbackText(label) {
+  return firstReadableCharacter(label);
+}
+function getCategoryTone(categoryId, label) {
+  const known = categoryDisplay.get(categoryId);
+  if (known) return known.tone;
+  const text = String(label || "").toLowerCase();
+  return toneKeywords.find((item) => item.words.some((word) => text.includes(word)))?.tone || "tone-gray";
+}
+
+function firstReadableCharacter(value) {
+  const text = String(value || "").trim();
+  const match = text.match(/[\p{Script=Han}a-zA-Z0-9]/u);
+  return match ? match[0].toUpperCase() : "•";
+}
+
+
+function getNextExpandedParentId(currentExpandedParentId, clickedParentId) {
+  return currentExpandedParentId === clickedParentId ? null : clickedParentId;
+}
+function getVisibleCategoryIds(categories, expandedParentId) {
+  const ids = [];
+  for (const parent of categories.filter((category) => !category.parentId)) {
+    ids.push(parent.id);
+    if (parent.id === expandedParentId) {
+      ids.push(...categories.filter((category) => category.parentId === parent.id).map((category) => category.id));
+    }
+  }
+  return ids;
+}
+
+
+const PERIODS = ["weekly", "monthly", "yearly"];
+const DATA_VERSION = 1;
+function isPeriod(value) {
+  return PERIODS.includes(value);
+}
+
+
+function addExpense(data, input, now = new Date().toISOString()) {
+  validateExpenseInput(data, input);
+  const expense = {
+    id: createId("expense"),
+    amount: Number(input.amount),
+    date: input.date,
+    categoryId: input.categoryId,
+    subcategoryId: input.subcategoryId,
+    note: input.note?.trim() || "",
+    createdAt: now,
+    updatedAt: now
+  };
+  return {
+    ...data,
+    expenses: [expense, ...data.expenses],
+    preferences: {
+      ...data.preferences,
+      lastCategoryId: input.categoryId,
+      lastSubcategoryId: input.subcategoryId
+    }
+  };
+}
+function editExpense(data, expenseId, patch, now = new Date().toISOString()) {
+  const current = data.expenses.find((expense) => expense.id === expenseId);
+  if (!current) throw new Error("没有找到这条支出");
+  const nextExpense = { ...current, ...patch, updatedAt: now };
+  validateExpenseInput(data, nextExpense, { allowDisabled: true });
+  return {
+    ...data,
+    expenses: data.expenses.map((expense) => expense.id === expenseId ? nextExpense : expense)
+  };
+}
+function deleteExpense(data, expenseId) {
+  return {
+    ...data,
+    expenses: data.expenses.filter((expense) => expense.id !== expenseId)
+  };
+}
+function addCategory(data, { name, parentId = null }, now = new Date().toISOString()) {
+  const trimmed = name.trim();
+  if (!trimmed) throw new Error("分类名称不能为空");
+  if (parentId && !data.categories.some((category) => category.id === parentId && !category.parentId)) {
+    throw new Error("没有找到一级分类");
+  }
+  return {
+    ...data,
+    categories: [...data.categories, {
+      id: createId("category"),
+      name: trimmed,
+      parentId,
+      active: true,
+      createdAt: now
+    }]
+  };
+}
+function renameCategory(data, categoryId, name) {
+  const trimmed = name.trim();
+  if (!trimmed) throw new Error("分类名称不能为空");
+  return {
+    ...data,
+    categories: data.categories.map((category) => category.id === categoryId ? { ...category, name: trimmed } : category)
+  };
+}
+function disableCategory(data, categoryId) {
+  return {
+    ...data,
+    categories: data.categories.map((category) => category.id === categoryId ? { ...category, active: false } : category)
+  };
+}
+function upsertBudgetRule(data, input) {
+  validateBudgetInput(data, input);
+  const existing = data.budgetRules.find((rule) => rule.id === input.id || (!input.id && rule.categoryId === input.categoryId && rule.period === input.period));
+  const nextRule = {
+    id: existing?.id || input.id || createId("budget"),
+    categoryId: input.categoryId,
+    period: input.period,
+    amount: Number(input.amount),
+    active: Boolean(input.active)
+  };
+  return {
+    ...data,
+    budgetRules: existing
+      ? data.budgetRules.map((rule) => rule.id === existing.id ? nextRule : rule)
+      : [...data.budgetRules, nextRule]
+  };
+}
+function deleteBudgetRule(data, budgetRuleId) {
+  return {
+    ...data,
+    budgetRules: data.budgetRules.filter((rule) => rule.id !== budgetRuleId)
+  };
+}
+
+function validateExpenseInput(data, input, options = {}) {
+  if (!(Number(input.amount) > 0)) throw new Error("金额必须大于 0");
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(input.date) || Number.isNaN(new Date(`${input.date}T00:00:00.000Z`).getTime())) {
+    throw new Error("日期无效");
+  }
+  const child = data.categories.find((category) => category.id === input.subcategoryId && category.parentId);
+  if (!child) throw new Error("请选择二级分类");
+  if (child.parentId !== input.categoryId) throw new Error("二级分类必须属于所选一级分类");
+  if (!options.allowDisabled && !child.active) throw new Error("停用分类不建议用于新增支出");
+}
+
+function validateBudgetInput(data, input) {
+  if (!(Number(input.amount) > 0)) throw new Error("预算金额必须大于 0");
+  if (!isPeriod(input.period)) throw new Error("预算周期无效");
+  if (!data.categories.some((category) => category.id === input.categoryId)) throw new Error("预算分类不存在");
+}
+
+function createId(prefix) {
+  if (globalThis.crypto?.randomUUID) return `${prefix}-${globalThis.crypto.randomUUID()}`;
+  return `${prefix}-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+}
+
+
+function parseBackupJson(json) {
+  let parsed;
+  try {
+    parsed = JSON.parse(json);
+  } catch {
+    return { ok: false, error: "JSON 无法解析" };
+  }
+  const error = validateAppData(parsed);
+  if (error) return { ok: false, error };
+  return { ok: true, data: parsed };
+}
+function importJsonBackup(currentData, json, mode = "overwrite", now = new Date().toISOString()) {
+  const parsed = parseBackupJson(json);
+  if (!parsed.ok) {
+    return { ok: false, error: parsed.error, data: currentData, backup: null };
+  }
+  const backup = { ...currentData, backupCreatedAt: now };
+  if (mode === "overwrite") {
+    return { ok: true, data: parsed.data, backup };
+  }
+  if (mode === "merge") {
+    return { ok: true, data: mergeData(currentData, parsed.data), backup };
+  }
+  return { ok: false, error: "导入模式必须是覆盖或合并", data: currentData, backup: null };
+}
+function exportJson(data) {
+  return JSON.stringify(data, null, 2);
+}
+function exportCsv(data) {
+  const categories = new Map(data.categories.map((category) => [category.id, category]));
+  const rows = [["日期", "金额", "一级分类", "二级分类", "备注"]];
+  for (const expense of [...data.expenses].sort((a, b) => a.date.localeCompare(b.date))) {
+    rows.push([
+      expense.date,
+      Number(expense.amount).toFixed(2),
+      categories.get(expense.categoryId)?.name || "未知",
+      categories.get(expense.subcategoryId)?.name || "未知",
+      expense.note || ""
+    ]);
+  }
+  return rows.map((row) => row.map(csvCell).join(",")).join("\n");
+}
+
+function validateAppData(data) {
+  if (!data || typeof data !== "object") return "备份必须是一个对象";
+  if (data.version !== DATA_VERSION) return "无法识别备份版本";
+  if (!Array.isArray(data.expenses) || !Array.isArray(data.categories) || !Array.isArray(data.budgetRules)) {
+    return "备份缺少必要数组";
+  }
+  if (!data.preferences || typeof data.preferences !== "object") return "备份缺少偏好设置";
+
+  for (const category of data.categories) {
+    if (!category.id || !category.name || typeof category.active !== "boolean" || !("parentId" in category)) {
+      return "分类记录无效";
+    }
+  }
+  for (const expense of data.expenses) {
+    if (!expense.id || !(Number(expense.amount) > 0) || !validDate(expense.date) || !expense.categoryId || !expense.subcategoryId) {
+      return "支出记录无效";
+    }
+  }
+  for (const rule of data.budgetRules) {
+    if (!rule.id || !rule.categoryId || !isPeriod(rule.period) || !(Number(rule.amount) > 0) || typeof rule.active !== "boolean") {
+      return "预算规则记录无效";
+    }
+  }
+  return null;
+}
+
+function mergeData(current, incoming) {
+  return {
+    ...current,
+    version: DATA_VERSION,
+    expenses: mergeById(current.expenses, incoming.expenses),
+    categories: mergeById(current.categories, incoming.categories),
+    budgetRules: mergeById(current.budgetRules, incoming.budgetRules),
+    preferences: { ...current.preferences, ...incoming.preferences }
+  };
+}
+
+function mergeById(left, right) {
+  const map = new Map(left.map((item) => [item.id, item]));
+  for (const item of right) map.set(item.id, item);
+  return Array.from(map.values());
+}
+
+function validDate(value) {
+  return /^\d{4}-\d{2}-\d{2}$/.test(value) && !Number.isNaN(new Date(`${value}T00:00:00.000Z`).getTime());
+}
+
+function csvCell(value) {
+  const text = String(value ?? "");
+  if (/[",\n]/.test(text)) return `"${text.replaceAll("\"", "\"\"")}"`;
+  return text;
+}
+
+
+const defaultCategories = [
+  parent("food", "餐饮", "2026-01-01T00:00:00.000Z"),
+  child("takeout", "外卖", "food", "2026-01-01T00:00:00.000Z"),
+  child("groceries", "菜场超市", "food", "2026-01-01T00:00:00.000Z"),
+  parent("transport", "交通", "2026-01-01T00:00:00.000Z"),
+  child("subway", "地铁公交", "transport", "2026-01-01T00:00:00.000Z"),
+  child("taxi", "打车", "transport", "2026-01-01T00:00:00.000Z"),
+  parent("shopping", "购物", "2026-01-01T00:00:00.000Z"),
+  child("daily-goods", "日用品", "shopping", "2026-01-01T00:00:00.000Z"),
+  parent("housing", "居住", "2026-01-01T00:00:00.000Z"),
+  child("rent", "房租", "housing", "2026-01-01T00:00:00.000Z"),
+  parent("entertainment", "娱乐", "2026-01-01T00:00:00.000Z"),
+  child("movies", "电影演出", "entertainment", "2026-01-01T00:00:00.000Z"),
+  parent("health", "健康", "2026-01-01T00:00:00.000Z"),
+  child("medicine", "药品医疗", "health", "2026-01-01T00:00:00.000Z"),
+  parent("learning", "学习", "2026-01-01T00:00:00.000Z"),
+  child("books", "书籍课程", "learning", "2026-01-01T00:00:00.000Z")
+];
+const defaultBudgetRules = [
+  { id: "budget-food-monthly", categoryId: "food", period: "monthly", amount: 2400, active: true },
+  { id: "budget-transport-monthly", categoryId: "transport", period: "monthly", amount: 600, active: true },
+  { id: "budget-entertainment-monthly", categoryId: "entertainment", period: "monthly", amount: 500, active: true },
+  { id: "budget-learning-yearly", categoryId: "learning", period: "yearly", amount: 3000, active: true }
+];
+function createInitialData(now = new Date().toISOString()) {
+  return {
+    version: DATA_VERSION,
+    expenses: [],
+    categories: defaultCategories.map((category) => ({ ...category, createdAt: category.createdAt || now })),
+    budgetRules: defaultBudgetRules.map((rule) => ({ ...rule })),
+    preferences: {
+      currency: "CNY",
+      overviewPeriod: "monthly",
+      lastCategoryId: "food",
+      lastSubcategoryId: "takeout"
+    }
+  };
+}
+
+function parent(id, name, createdAt) {
+  return { id, name, parentId: null, active: true, createdAt };
+}
+
+function child(id, name, parentId, createdAt) {
+  return { id, name, parentId, active: true, createdAt };
+}
+
+
+
+
+const DATA_KEY = "budget-ledger:data";
+const BACKUP_KEY = "budget-ledger:last-backup";
+const legacyCategoryNames = new Map([
+  ["food", ["Food", "餐饮"]],
+  ["takeout", ["Takeout", "外卖"]],
+  ["groceries", ["Groceries", "菜场超市"]],
+  ["transport", ["Transport", "交通"]],
+  ["subway", ["Subway", "地铁公交"]],
+  ["taxi", ["Taxi", "打车"]],
+  ["shopping", ["Shopping", "购物"]],
+  ["daily-goods", ["Daily Goods", "日用品"]],
+  ["housing", ["Housing", "居住"]],
+  ["rent", ["Rent", "房租"]],
+  ["entertainment", ["Entertainment", "娱乐"]],
+  ["movies", ["Movies", "电影演出"]],
+  ["health", ["Health", "健康"]],
+  ["medicine", ["Medicine", "药品医疗"]],
+  ["learning", ["Learning", "学习"]],
+  ["books", ["Books", "书籍课程"]]
+]);
+function loadData(storage = globalThis.localStorage) {
+  if (!storage) return createInitialData();
+  const raw = storage.getItem(DATA_KEY);
+  if (!raw) return createInitialData();
+  const parsed = parseBackupJson(raw);
+  if (!parsed.ok) return { ...createInitialData(), recovery: { corruptData: raw } };
+  const migrated = migrateLegacyChineseLabels(parsed.data);
+  if (migrated.changed) saveData(migrated.data, storage);
+  return migrated.data;
+}
+function saveData(data, storage = globalThis.localStorage) {
+  storage?.setItem(DATA_KEY, JSON.stringify(data));
+}
+function saveBackup(data, storage = globalThis.localStorage) {
+  storage?.setItem(BACKUP_KEY, JSON.stringify(data));
+}
+function loadBackup(storage = globalThis.localStorage) {
+  const raw = storage?.getItem(BACKUP_KEY);
+  if (!raw) return null;
+  const parsed = parseBackupJson(raw);
+  return parsed.ok ? parsed.data : null;
+}
+function applyImport(currentData, json, mode, storage = globalThis.localStorage) {
+  const result = importJsonBackup(currentData, json, mode);
+  if (result.ok) {
+    const migrated = migrateLegacyChineseLabels(result.data);
+    saveBackup(result.backup, storage);
+    saveData(migrated.data, storage);
+    return { ...result, data: migrated.data };
+  }
+  return result;
+}
+
+function migrateLegacyChineseLabels(data) {
+  let changed = false;
+  const categories = data.categories.map((category) => {
+    const legacy = legacyCategoryNames.get(category.id);
+    if (!legacy || category.name !== legacy[0]) return category;
+    changed = true;
+    return { ...category, name: legacy[1] };
+  });
+  return { changed, data: changed ? { ...data, categories } : data };
+}
+
+
+
+
+
+
+
+
+
+const navItems = [
+  ["overview", "总览"],
+  ["add", "记一笔"],
+  ["categories", "分类与预算"],
+  ["details", "流水明细"],
+  ["import", "导入导出"]
+];
+
+const state = {
+  data: loadData(),
+  view: "overview",
+  overviewPeriod: null,
+  detailsPeriod: "monthly",
+  detailsParent: "all",
+  detailsChild: "all",
+  detailsKeyword: "",
+  selectedCategoryId: null,
+  expandedParentId: null,
+  editingExpenseId: null,
+  importMode: "overwrite",
+  importText: "",
+  notice: ""
+};
+
+const app = document.getElementById("app");
+render();
+
+function render() {
+  const period = state.overviewPeriod || state.data.preferences.overviewPeriod || "monthly";
+  app.innerHTML = `
+    <div class="shell">
+      <aside class="sidebar">
+        <div class="brand">
+          <div class="brand-mark">¥</div>
+          <div>
+            <strong>每日记账</strong>
+            <span>本地支出流水</span>
+          </div>
+        </div>
+        <nav class="nav-list">${navItems.map(([id, label]) => navButton(id, label)).join("")}</nav>
+        <div class="sidebar-footer">
+          <span>数据保存在本机</span>
+          <strong>${state.data.expenses.length} 条流水</strong>
+        </div>
+      </aside>
+      <main class="content">
+        ${state.notice ? `<div class="notice">${escapeHtml(state.notice)}</div>` : ""}
+        ${state.view === "overview" ? overviewView(period) : ""}
+        ${state.view === "add" ? addExpenseView("page") : ""}
+        ${state.view === "categories" ? categoriesView() : ""}
+        ${state.view === "details" ? detailsView() : ""}
+        ${state.view === "import" ? importExportView() : ""}
+      </main>
+      <nav class="bottom-nav">${navItems.map(([id, label]) => navButton(id, label, true)).join("")}</nav>
+    </div>
+  `;
+  bindEvents();
+}
+
+function overviewView(period) {
+  const today = localIsoDate();
+  const rows = getBudgetRows({
+    categories: state.data.categories,
+    expenses: state.data.expenses,
+    budgetRules: state.data.budgetRules,
+    period,
+    today
+  });
+  const totals = getOverviewTotals({
+    categories: state.data.categories,
+    expenses: state.data.expenses,
+    budgetRules: state.data.budgetRules,
+    period,
+    today
+  });
+  const recent = state.data.expenses.slice(0, 6);
+  return `
+    <section class="view-grid">
+      <div class="main-column">
+        <header class="page-head">
+          <div>
+            <h1>总览</h1>
+            <p>${rangeLabel(period, today)}</p>
+          </div>
+          <div class="segmented" role="group" aria-label="总览周期">
+            ${["weekly", "monthly", "yearly"].map((item) => `
+              <button class="${period === item ? "active" : ""}" data-period="${item}">${labelPeriod(item)}</button>
+            `).join("")}
+          </div>
+        </header>
+        <div class="metric-row">
+          ${metricCard("spent", "已支出", money(totals.spent), "本周期已记录支出")}
+          ${metricCard("remaining", "剩余", money(totals.remaining), totals.remaining < 0 ? `超出预算 ${money(totals.overage)}` : "可用预算")}
+          ${metricCard("budgeted", "预算", money(totals.budgeted), `${rows.length} 条启用规则`)}
+        </div>
+        <section class="panel budget-panel">
+          <div class="panel-head">
+            <h2>预算状态</h2>
+            <span>${labelPeriod(period)}</span>
+          </div>
+          ${rows.length ? `
+            <div class="budget-header">
+              <span>分类</span>
+              <span>已支出</span>
+              <span>预算</span>
+              <span>剩余</span>
+              <span>进度</span>
+            </div>
+          ` : ""}
+          <div class="budget-list">
+            ${rows.length ? rows.map(budgetRow).join("") : emptyState("当前周期还没有启用的预算规则。")}
+          </div>
+        </section>
+        <section class="panel">
+          <div class="panel-head">
+            <h2>最近流水</h2>
+            <button class="text-btn" data-view="details">查看全部</button>
+          </div>
+          <div class="recent-list">${recent.length ? recent.map(expenseItem).join("") : emptyState("先记一笔支出，开始追踪日常花销。")}</div>
+        </section>
+      </div>
+      <aside class="right-column">
+        ${addExpenseView("compact")}
+        <section class="panel">
+          <div class="panel-head">
+            <h2>提醒</h2>
+          </div>
+          ${signalList(rows)}
+        </section>
+      </aside>
+    </section>
+  `;
+}
+
+function addExpenseView(mode) {
+  const parents = parentCategories().filter((category) => category.active);
+  const selectedParent = state.data.preferences.lastCategoryId || parents[0]?.id || "";
+  const children = childCategories(selectedParent).filter((category) => category.active);
+  const selectedChild = children.some((child) => child.id === state.data.preferences.lastSubcategoryId)
+    ? state.data.preferences.lastSubcategoryId
+    : children[0]?.id || "";
+  const today = localIsoDate();
+  return `
+    <section class="panel add-panel ${mode === "compact" ? "compact-panel" : ""}">
+      <div class="panel-head">
+        <h2>${mode === "compact" ? "快速记账" : "记一笔支出"}</h2>
+        ${mode === "compact" ? `<button class="text-btn" data-view="add">完整表单</button>` : ""}
+      </div>
+      <form id="${mode}-expense-form" class="form-grid expense-form">
+        <label>
+          <span>金额</span>
+          <input name="amount" type="number" min="0.01" step="0.01" placeholder="0.00" required autofocus>
+        </label>
+        <label class="default-date-field">
+          <span>日期</span>
+          <input name="date" type="date" value="${today}" data-default-date="today" required>
+        </label>
+        <label>
+          <span>一级分类</span>
+          <select name="categoryId" data-child-target="${mode}-child-select" required>
+            ${parents.map((category) => option(category.id, category.name, category.id === selectedParent)).join("")}
+          </select>
+        </label>
+        <label>
+          <span>二级分类</span>
+          <select id="${mode}-child-select" name="subcategoryId" required>
+            ${children.map((category) => option(category.id, category.name, category.id === selectedChild)).join("")}
+          </select>
+        </label>
+        <label class="wide">
+          <span>备注</span>
+          <input name="note" type="text" placeholder="可选备注">
+        </label>
+        <button class="primary-btn wide" type="submit">保存支出</button>
+      </form>
+    </section>
+  `;
+}
+
+function categoriesView() {
+  const selected = state.data.categories.find((category) => category.id === state.selectedCategoryId) || parentCategories()[0];
+  const rules = state.data.budgetRules.filter((rule) => rule.categoryId === selected?.id);
+  return `
+    <section class="split-view">
+      <div class="panel">
+        <div class="panel-head">
+          <h2>分类树</h2>
+        </div>
+        <div class="category-tree">${parentCategories().map((parent) => categoryBranch(parent)).join("")}</div>
+        <form id="parent-category-form" class="inline-form">
+          <input name="name" placeholder="新增一级分类" required>
+          <button type="submit">添加</button>
+        </form>
+      </div>
+      <div class="panel detail-panel">
+        <div class="panel-head">
+          <h2>${escapeHtml(selected?.name || "分类")}</h2>
+          <span>${selected?.parentId ? "二级分类" : "一级分类"}</span>
+        </div>
+        ${selected ? `
+          <form id="rename-category-form" class="inline-form">
+            <input name="name" value="${escapeAttr(selected.name)}" required>
+            <button type="submit">重命名</button>
+            <button type="button" class="danger-btn" data-disable-category="${selected.id}" ${selected.active ? "" : "disabled"}>停用</button>
+          </form>
+          ${!selected.parentId ? `
+            <form id="child-category-form" class="inline-form">
+              <input name="name" placeholder="新增二级分类" required>
+              <button type="submit">添加子类</button>
+            </form>
+          ` : ""}
+          <section class="rule-section">
+            <h3>预算规则</h3>
+            <div class="rule-list">${rules.length ? rules.map(ruleItem).join("") : emptyState("该分类还没有预算规则。")}</div>
+            <form id="budget-rule-form" class="inline-form rule-form">
+              <select name="period">
+                <option value="weekly">每周</option>
+                <option value="monthly" selected>每月</option>
+                <option value="yearly">每年</option>
+              </select>
+              <input name="amount" type="number" min="0.01" step="0.01" placeholder="预算金额" required>
+              <label class="check-label"><input name="active" type="checkbox" checked> 启用</label>
+              <button type="submit">保存规则</button>
+            </form>
+          </section>
+        ` : ""}
+      </div>
+    </section>
+  `;
+}
+
+function detailsView() {
+  const expenses = filteredExpenses();
+  const editing = state.data.expenses.find((expense) => expense.id === state.editingExpenseId);
+  return `
+    <section class="panel">
+      <div class="panel-head">
+        <div>
+          <h2>流水明细</h2>
+          <span>${expenses.length} 条匹配流水</span>
+        </div>
+      </div>
+      <div class="filters">
+        <select id="details-period">
+          ${["weekly", "monthly", "yearly", "all"].map((period) => option(period, labelPeriod(period), period === state.detailsPeriod)).join("")}
+        </select>
+        <select id="details-parent">
+          <option value="all">全部一级分类</option>
+          ${parentCategories().map((category) => option(category.id, category.name, category.id === state.detailsParent)).join("")}
+        </select>
+        <select id="details-child">
+          <option value="all">全部二级分类</option>
+          ${childCategories(state.detailsParent === "all" ? null : state.detailsParent).map((category) => option(category.id, category.name, category.id === state.detailsChild)).join("")}
+        </select>
+        <input id="details-keyword" value="${escapeAttr(state.detailsKeyword)}" placeholder="搜索备注或分类">
+      </div>
+      ${editing ? editExpenseForm(editing) : ""}
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>日期</th><th>金额</th><th>分类</th><th>备注</th><th></th></tr></thead>
+          <tbody>${expenses.length ? expenses.map(expenseRow).join("") : `<tr><td colspan="5">${emptyState("没有符合筛选条件的流水。")}</td></tr>`}</tbody>
+        </table>
+      </div>
+    </section>
+  `;
+}
+
+function importExportView() {
+  return `
+    <section class="split-view">
+      <div class="panel">
+        <div class="panel-head">
+          <h2>导出</h2>
+        </div>
+        <div class="tool-list">
+          <button class="primary-btn" data-export-json>导出 JSON 备份</button>
+          <button data-export-csv>导出 CSV 流水</button>
+          <p>JSON 备份会保留分类、预算规则、支出流水和偏好设置。</p>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="panel-head">
+          <h2>导入</h2>
+        </div>
+        <form id="import-form" class="import-form">
+          <div class="segmented">
+            <button type="button" data-import-mode="overwrite" class="${state.importMode === "overwrite" ? "active" : ""}">覆盖</button>
+            <button type="button" data-import-mode="merge" class="${state.importMode === "merge" ? "active" : ""}">合并</button>
+          </div>
+          <input id="backup-file" type="file" accept="application/json,.json">
+          <textarea name="backup" rows="10" placeholder="在这里粘贴 JSON 备份">${escapeHtml(state.importText)}</textarea>
+          <button class="primary-btn" type="submit">导入备份</button>
+        </form>
+      </div>
+    </section>
+  `;
+}
+
+function bindEvents() {
+  initializeExpenseFormDates();
+  document.querySelectorAll("[data-view]").forEach((button) => {
+    button.addEventListener("click", () => {
+      state.view = button.dataset.view;
+      state.notice = "";
+      render();
+      window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+    });
+  });
+  document.querySelectorAll("[data-period]").forEach((button) => {
+    button.addEventListener("click", () => {
+      state.overviewPeriod = button.dataset.period;
+      state.data.preferences.overviewPeriod = button.dataset.period;
+        persist("周期已更新");
+    });
+  });
+  document.querySelectorAll(".expense-form").forEach((form) => {
+    form.addEventListener("submit", (event) => {
+      event.preventDefault();
+      try {
+        const input = formData(form);
+        state.data = addExpense(state.data, {
+          amount: Number(input.amount),
+          date: input.date,
+          categoryId: input.categoryId,
+          subcategoryId: input.subcategoryId,
+          note: input.note
+        });
+        persist("支出已保存");
+      } catch (error) {
+        notify(error.message);
+      }
+    });
+  });
+  document.querySelectorAll("select[data-child-target]").forEach((select) => {
+    select.addEventListener("change", () => updateChildSelect(select));
+  });
+  bindCategoryEvents();
+  bindDetailsEvents();
+  bindImportExportEvents();
+}
+
+function initializeExpenseFormDates() {
+  const today = localIsoDate();
+  document.querySelectorAll('.expense-form input[name="date"][data-default-date="today"]').forEach((input) => {
+    input.defaultValue = today;
+    input.value = today;
+  });
+}
+
+function bindCategoryEvents() {
+  document.querySelectorAll("[data-select-category]").forEach((button) => {
+    button.addEventListener("click", () => {
+      const categoryId = button.dataset.selectCategory;
+      const category = state.data.categories.find((item) => item.id === categoryId);
+      state.selectedCategoryId = categoryId;
+      if (category && !category.parentId) {
+        state.expandedParentId = getNextExpandedParentId(state.expandedParentId, categoryId);
+      }
+      render();
+    });
+  });
+  document.getElementById("parent-category-form")?.addEventListener("submit", (event) => {
+    event.preventDefault();
+    try {
+      state.data = addCategory(state.data, { name: formData(event.currentTarget).name });
+      persist("一级分类已添加");
+    } catch (error) {
+      notify(error.message);
+    }
+  });
+  document.getElementById("child-category-form")?.addEventListener("submit", (event) => {
+    event.preventDefault();
+    try {
+      state.data = addCategory(state.data, { name: formData(event.currentTarget).name, parentId: state.selectedCategoryId });
+      persist("二级分类已添加");
+    } catch (error) {
+      notify(error.message);
+    }
+  });
+  document.getElementById("rename-category-form")?.addEventListener("submit", (event) => {
+    event.preventDefault();
+    try {
+      state.data = renameCategory(state.data, state.selectedCategoryId || parentCategories()[0].id, formData(event.currentTarget).name);
+      persist("分类已重命名");
+    } catch (error) {
+      notify(error.message);
+    }
+  });
+  document.querySelector("[data-disable-category]")?.addEventListener("click", (event) => {
+    state.data = disableCategory(state.data, event.currentTarget.dataset.disableCategory);
+    persist("分类已停用");
+  });
+  document.getElementById("budget-rule-form")?.addEventListener("submit", (event) => {
+    event.preventDefault();
+    try {
+      const input = formData(event.currentTarget);
+      state.data = upsertBudgetRule(state.data, {
+        categoryId: state.selectedCategoryId || parentCategories()[0].id,
+        period: input.period,
+        amount: Number(input.amount),
+        active: Boolean(input.active)
+      });
+      persist("预算规则已保存");
+    } catch (error) {
+      notify(error.message);
+    }
+  });
+  document.querySelectorAll("[data-delete-rule]").forEach((button) => {
+    button.addEventListener("click", () => {
+      state.data = deleteBudgetRule(state.data, button.dataset.deleteRule);
+      persist("预算规则已删除");
+    });
+  });
+}
+
+function bindDetailsEvents() {
+  document.querySelectorAll("[data-filter-category]").forEach((button) => {
+    button.addEventListener("click", () => {
+      state.view = "details";
+      state.detailsPeriod = state.overviewPeriod || state.data.preferences.overviewPeriod || "monthly";
+      state.detailsParent = button.dataset.filterCategory;
+      state.detailsChild = "all";
+      render();
+    });
+  });
+  document.getElementById("details-period")?.addEventListener("change", (event) => {
+    state.detailsPeriod = event.target.value;
+    render();
+  });
+  document.getElementById("details-parent")?.addEventListener("change", (event) => {
+    state.detailsParent = event.target.value;
+    state.detailsChild = "all";
+    render();
+  });
+  document.getElementById("details-child")?.addEventListener("change", (event) => {
+    state.detailsChild = event.target.value;
+    render();
+  });
+  document.getElementById("details-keyword")?.addEventListener("input", (event) => {
+    state.detailsKeyword = event.target.value;
+    render();
+  });
+  document.querySelectorAll("[data-edit-expense]").forEach((button) => {
+    button.addEventListener("click", () => {
+      state.editingExpenseId = button.dataset.editExpense;
+      render();
+    });
+  });
+  document.querySelectorAll("[data-delete-expense]").forEach((button) => {
+    button.addEventListener("click", () => {
+      state.data = deleteExpense(state.data, button.dataset.deleteExpense);
+      persist("支出已删除");
+    });
+  });
+  document.getElementById("edit-expense-form")?.addEventListener("submit", (event) => {
+    event.preventDefault();
+    try {
+      const input = formData(event.currentTarget);
+      state.data = editExpense(state.data, state.editingExpenseId, {
+        amount: Number(input.amount),
+        date: input.date,
+        categoryId: input.categoryId,
+        subcategoryId: input.subcategoryId,
+        note: input.note
+      });
+      state.editingExpenseId = null;
+      persist("支出已更新");
+    } catch (error) {
+      notify(error.message);
+    }
+  });
+}
+
+function bindImportExportEvents() {
+  document.querySelector("[data-export-json]")?.addEventListener("click", () => download("记账备份.json", exportJson(state.data), "application/json"));
+  document.querySelector("[data-export-csv]")?.addEventListener("click", () => download("支出流水.csv", exportCsv(state.data), "text/csv"));
+  document.querySelectorAll("[data-import-mode]").forEach((button) => {
+    button.addEventListener("click", () => {
+      state.importMode = button.dataset.importMode;
+      render();
+    });
+  });
+  document.getElementById("backup-file")?.addEventListener("change", async (event) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    state.importText = await file.text();
+    render();
+  });
+  document.getElementById("import-form")?.addEventListener("submit", (event) => {
+    event.preventDefault();
+    const input = formData(event.currentTarget);
+    const result = applyImport(state.data, input.backup, state.importMode);
+    if (result.ok) {
+      state.data = result.data;
+      state.importText = "";
+      persist(`备份已${state.importMode === "merge" ? "合并" : "覆盖"}导入`);
+    } else {
+      notify(result.error);
+    }
+  });
+}
+
+function navButton(id, label, compact = false) {
+  return `
+    <button class="nav-btn ${state.view === id ? "active" : ""}" data-view="${id}">
+      <span class="nav-icon icon-${id}" aria-hidden="true"></span>
+      <em>${compact ? shortLabel(label) : label}</em>
+    </button>
+  `;
+}
+
+function budgetRow(row) {
+  const pct = Math.min(100, Math.round(row.ratio * 100));
+  const tone = getCategoryTone(row.categoryId, row.categoryName);
+  return `
+    <button class="budget-row ${row.state}" data-filter-category="${row.categoryId}">
+      <div class="budget-main">
+        <span class="category-orb ${tone}" aria-hidden="true">${categoryIcon(row.categoryId, row.categoryName)}</span>
+        <span>
+          <strong>${escapeHtml(row.categoryName)}</strong>
+          <em>${labelPeriod(row.period)}规则</em>
+        </span>
+      </div>
+      <div class="budget-cell">
+        <span>已支出</span>
+        <b>${money(row.spent)}</b>
+      </div>
+      <div class="budget-cell">
+        <span>预算</span>
+        <b>${money(row.amount)}</b>
+      </div>
+      <div class="budget-cell ${row.remaining < 0 ? "negative" : "positive"}">
+        <span>剩余</span>
+        <b>${money(row.remaining)}</b>
+      </div>
+      <div class="progress-cell">
+        <div class="progress"><i style="width:${pct}%"></i></div>
+      </div>
+      <strong class="budget-percent">${pct}%</strong>
+    </button>
+  `;
+}
+
+function metricCard(kind, label, value, caption) {
+  return `
+    <div class="metric metric-${kind}">
+      <div>
+        <span>${label}</span>
+        <strong>${value}</strong>
+        <em>${caption}</em>
+      </div>
+      <i class="metric-icon" aria-hidden="true">${metricIcon(kind)}</i>
+    </div>
+  `;
+}
+
+function metricIcon(kind) {
+  return `<span class="metric-glyph metric-glyph-${escapeAttr(kind)}"></span>`;
+}
+
+function expenseItem(expense) {
+  const label = categoryPath(expense);
+  const iconCategoryId = expense.subcategoryId || expense.categoryId;
+  const tone = getCategoryTone(iconCategoryId, label);
+  return `
+    <div class="expense-item">
+      <span class="category-orb ${tone}" aria-hidden="true">${categoryIcon(iconCategoryId, label)}</span>
+      <div><strong>${escapeHtml(label)}</strong><span>${escapeHtml(expense.note || "无备注")}</span></div>
+      <div><b>${money(expense.amount)}</b><span>${expense.date}</span></div>
+    </div>
+  `;
+}
+
+function expenseRow(expense) {
+  return `
+    <tr>
+      <td>${expense.date}</td>
+      <td>${money(expense.amount)}</td>
+      <td>${escapeHtml(categoryPath(expense))}</td>
+      <td>${escapeHtml(expense.note || "")}</td>
+      <td class="actions">
+        <button data-edit-expense="${expense.id}">编辑</button>
+        <button class="danger-btn" data-delete-expense="${expense.id}">删除</button>
+      </td>
+    </tr>
+  `;
+}
+
+function editExpenseForm(expense) {
+  const parents = parentCategories();
+  const children = childCategories(expense.categoryId);
+  return `
+    <form id="edit-expense-form" class="edit-form">
+      <input name="amount" type="number" min="0.01" step="0.01" value="${expense.amount}" required>
+      <input name="date" type="date" value="${expense.date}" required>
+      <select name="categoryId" data-child-target="edit-child-select">
+        ${parents.map((category) => option(category.id, category.name, category.id === expense.categoryId)).join("")}
+      </select>
+      <select id="edit-child-select" name="subcategoryId">
+        ${children.map((category) => option(category.id, category.name, category.id === expense.subcategoryId)).join("")}
+      </select>
+      <input name="note" value="${escapeAttr(expense.note)}">
+      <button class="primary-btn" type="submit">更新</button>
+    </form>
+  `;
+}
+
+function categoryBranch(parent) {
+  const isExpanded = state.expandedParentId === parent.id;
+  const children = childCategories(parent.id);
+  return `
+    <div class="branch">
+      <button class="category-node parent ${selectedClass(parent.id)} ${parent.active ? "" : "muted"}" data-select-category="${parent.id}" aria-expanded="${isExpanded}">
+        <span class="tree-toggle">${isExpanded ? "-" : "+"}</span>
+        ${escapeHtml(parent.name)}
+      </button>
+      ${isExpanded ? `<div class="children">${children.map((child) => `
+        <button class="category-node ${selectedClass(child.id)} ${child.active ? "" : "muted"}" data-select-category="${child.id}">
+          ${escapeHtml(child.name)}
+        </button>
+      `).join("")}</div>` : ""}
+    </div>
+  `;
+}
+
+function ruleItem(rule) {
+  return `
+    <div class="rule-item">
+      <div><strong>${labelPeriod(rule.period)}</strong><span>${rule.active ? "启用中" : "已暂停"}</span></div>
+      <b>${money(rule.amount)}</b>
+      <button class="danger-btn" data-delete-rule="${rule.id}">删除</button>
+    </div>
+  `;
+}
+
+function signalList(rows) {
+  const signals = rows.filter((row) => row.state !== "normal");
+  if (!signals.length) {
+    return `
+      <div class="signal signal-ok">
+        <span class="signal-check" aria-hidden="true"></span>
+        <div>
+          <strong>预算状态良好</strong>
+          <span>暂无接近或超出预算的分类。</span>
+        </div>
+      </div>
+    `;
+  }
+  return `<div class="signal-list">${signals.map((row) => `
+    <div class="signal ${row.state}">
+      <strong>${escapeHtml(row.categoryName)}</strong>
+      <span>${row.state === "over" ? `超出 ${money(Math.abs(row.remaining))}` : `已用 ${Math.round(row.ratio * 100)}%`}</span>
+    </div>
+  `).join("")}</div>`;
+}
+
+function filteredExpenses() {
+  const keyword = state.detailsKeyword.trim().toLowerCase();
+  return state.data.expenses.filter((expense) => {
+    if (state.detailsPeriod !== "all" && !isDateInPeriod(expense.date, state.detailsPeriod, localIsoDate())) return false;
+    if (state.detailsParent !== "all" && expense.categoryId !== state.detailsParent) return false;
+    if (state.detailsChild !== "all" && expense.subcategoryId !== state.detailsChild) return false;
+    if (!keyword) return true;
+    return `${expense.note} ${categoryPath(expense)}`.toLowerCase().includes(keyword);
+  });
+}
+
+function updateChildSelect(parentSelect) {
+  const target = document.getElementById(parentSelect.dataset.childTarget);
+  if (!target) return;
+  target.innerHTML = childCategories(parentSelect.value)
+    .filter((category) => category.active)
+    .map((category) => option(category.id, category.name, false))
+    .join("");
+}
+
+function parentCategories() {
+  return state.data.categories.filter((category) => !category.parentId);
+}
+
+function childCategories(parentId) {
+  return state.data.categories.filter((category) => parentId ? category.parentId === parentId : category.parentId);
+}
+
+function categoryPath(expense) {
+  const parent = state.data.categories.find((category) => category.id === expense.categoryId);
+  const child = state.data.categories.find((category) => category.id === expense.subcategoryId);
+  return `${parent?.name || "未知"} / ${child?.name || "未知"}`;
+}
+
+function categoryIcon(categoryId, label) {
+  const glyph = getCategoryGlyph(categoryId);
+  const text = glyph === "glyph-text" ? escapeHtml(getCategoryFallbackText(label)) : "";
+  return `<span class="category-glyph ${escapeAttr(glyph)}">${text}</span>`;
+}
+
+function persist(message) {
+  saveData(state.data);
+  notify(message);
+}
+
+function notify(message) {
+  state.notice = message;
+  render();
+}
+
+function formData(form) {
+  const data = new FormData(form);
+  return Object.fromEntries(data.entries());
+}
+
+function download(filename, text, type) {
+  const blob = new Blob([text], { type });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = filename;
+  link.click();
+  URL.revokeObjectURL(url);
+}
+
+function money(value) {
+  return new Intl.NumberFormat("zh-CN", { style: "currency", currency: state.data.preferences.currency || "CNY" }).format(value);
+}
+
+function rangeLabel(period, today) {
+  const range = getPeriodRange(period, today);
+  return `${labelPeriod(period)}：${range.start} 至 ${range.end}`;
+}
+
+function labelPeriod(period) {
+  return ({ weekly: "每周", monthly: "每月", yearly: "每年", all: "全部时间" })[period] || period;
+}
+
+function localIsoDate() {
+  const now = new Date();
+  const offset = now.getTimezoneOffset();
+  return new Date(now.getTime() - offset * 60_000).toISOString().slice(0, 10);
+}
+
+function emptyState(text) {
+  return `<div class="empty">${escapeHtml(text)}</div>`;
+}
+
+function option(value, label, selected) {
+  return `<option value="${escapeAttr(value)}" ${selected ? "selected" : ""}>${escapeHtml(label)}</option>`;
+}
+
+function selectedClass(id) {
+  return (state.selectedCategoryId || parentCategories()[0]?.id) === id ? "selected" : "";
+}
+
+function shortLabel(label) {
+  return label.replace("分类与预算", "预算").replace("导入导出", "导入");
+}
+
+function escapeHtml(value) {
+  return String(value ?? "")
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
+}
+
+function escapeAttr(value) {
+  return escapeHtml(value);
+}
+
+</script>
+  </body>
+</html>

@@ -1,22 +1,22 @@
 import { DATA_VERSION } from "./types.js";
 
 export const defaultCategories = [
-  parent("food", "Food", "2026-01-01T00:00:00.000Z"),
-  child("takeout", "Takeout", "food", "2026-01-01T00:00:00.000Z"),
-  child("groceries", "Groceries", "food", "2026-01-01T00:00:00.000Z"),
-  parent("transport", "Transport", "2026-01-01T00:00:00.000Z"),
-  child("subway", "Subway", "transport", "2026-01-01T00:00:00.000Z"),
-  child("taxi", "Taxi", "transport", "2026-01-01T00:00:00.000Z"),
-  parent("shopping", "Shopping", "2026-01-01T00:00:00.000Z"),
-  child("daily-goods", "Daily Goods", "shopping", "2026-01-01T00:00:00.000Z"),
-  parent("housing", "Housing", "2026-01-01T00:00:00.000Z"),
-  child("rent", "Rent", "housing", "2026-01-01T00:00:00.000Z"),
-  parent("entertainment", "Entertainment", "2026-01-01T00:00:00.000Z"),
-  child("movies", "Movies", "entertainment", "2026-01-01T00:00:00.000Z"),
-  parent("health", "Health", "2026-01-01T00:00:00.000Z"),
-  child("medicine", "Medicine", "health", "2026-01-01T00:00:00.000Z"),
-  parent("learning", "Learning", "2026-01-01T00:00:00.000Z"),
-  child("books", "Books", "learning", "2026-01-01T00:00:00.000Z")
+  parent("food", "餐饮", "2026-01-01T00:00:00.000Z"),
+  child("takeout", "外卖", "food", "2026-01-01T00:00:00.000Z"),
+  child("groceries", "菜场超市", "food", "2026-01-01T00:00:00.000Z"),
+  parent("transport", "交通", "2026-01-01T00:00:00.000Z"),
+  child("subway", "地铁公交", "transport", "2026-01-01T00:00:00.000Z"),
+  child("taxi", "打车", "transport", "2026-01-01T00:00:00.000Z"),
+  parent("shopping", "购物", "2026-01-01T00:00:00.000Z"),
+  child("daily-goods", "日用品", "shopping", "2026-01-01T00:00:00.000Z"),
+  parent("housing", "居住", "2026-01-01T00:00:00.000Z"),
+  child("rent", "房租", "housing", "2026-01-01T00:00:00.000Z"),
+  parent("entertainment", "娱乐", "2026-01-01T00:00:00.000Z"),
+  child("movies", "电影演出", "entertainment", "2026-01-01T00:00:00.000Z"),
+  parent("health", "健康", "2026-01-01T00:00:00.000Z"),
+  child("medicine", "药品医疗", "health", "2026-01-01T00:00:00.000Z"),
+  parent("learning", "学习", "2026-01-01T00:00:00.000Z"),
+  child("books", "书籍课程", "learning", "2026-01-01T00:00:00.000Z")
 ];
 
 export const defaultBudgetRules = [

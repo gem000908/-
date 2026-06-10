@@ -34,10 +34,10 @@ export function getOverviewTotals(input) {
 }
 
 export function categoryLabel(categories, category) {
-  if (!category) return "Unknown";
+  if (!category) return "未知";
   if (!category.parentId) return category.name;
   const parent = categories.find((item) => item.id === category.parentId);
-  return `${parent?.name || "Unknown"} / ${category.name}`;
+  return `${parent?.name || "未知"} / ${category.name}`;
 }
 
 export function sumForCategory({ categories, expenses, categoryId, period, today }) {

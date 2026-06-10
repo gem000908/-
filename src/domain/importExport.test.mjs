@@ -63,8 +63,8 @@ test("CSV export includes readable category names and escaped notes", () => {
 
   const csv = exportCsv(data);
 
-  assert.equal(csv.split("\n")[0], "Date,Amount,Parent Category,Child Category,Note");
-  assert.match(csv, /2026-06-07,12.50,Food,Takeout,"lunch, spicy"/);
+  assert.equal(csv.split("\n")[0], "日期,金额,一级分类,二级分类,备注");
+  assert.match(csv, /2026-06-07,12.50,餐饮,外卖,"lunch, spicy"/);
 });
 
 test("parseBackupJson rejects malformed records", () => {
