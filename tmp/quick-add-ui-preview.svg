@@ -1,0 +1,93 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="920" height="720" viewBox="0 0 920 720">
+  <defs>
+    <linearGradient id="pageBg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#f7fbfb"/>
+      <stop offset="0.52" stop-color="#eef7f5"/>
+      <stop offset="1" stop-color="#f6f1ea"/>
+    </linearGradient>
+    <linearGradient id="cardGlow" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#ffffff"/>
+      <stop offset="1" stop-color="#fbfefd"/>
+    </linearGradient>
+    <linearGradient id="primary" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#18b7aa"/>
+      <stop offset="1" stop-color="#067f78"/>
+    </linearGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="18" stdDeviation="22" flood-color="#12302f" flood-opacity="0.16"/>
+    </filter>
+    <filter id="softShadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="8" stdDeviation="12" flood-color="#12302f" flood-opacity="0.09"/>
+    </filter>
+    <style>
+      .body { font-family: Inter, "Microsoft YaHei", "Noto Sans SC", system-ui, sans-serif; }
+      .title { font-size: 34px; font-weight: 780; fill: #082426; letter-spacing: 0; }
+      .link { font-size: 30px; font-weight: 760; fill: #078f86; letter-spacing: 0; }
+      .label { font-size: 17px; font-weight: 560; fill: #526365; }
+      .value { font-size: 30px; font-weight: 600; fill: #07191c; }
+      .mutedValue { font-size: 30px; font-weight: 520; fill: #6a7477; }
+      .selectValue { font-size: 29px; font-weight: 650; fill: #08191d; }
+      .caption { font-size: 15px; font-weight: 540; fill: #67797a; }
+      .buttonText { font-size: 31px; font-weight: 780; fill: #ffffff; }
+    </style>
+  </defs>
+
+  <rect width="920" height="720" fill="url(#pageBg)"/>
+  <circle cx="780" cy="110" r="138" fill="#dff3ef" opacity="0.75"/>
+  <circle cx="92" cy="624" r="160" fill="#e8eefc" opacity="0.65"/>
+
+  <g class="body" filter="url(#shadow)">
+    <rect x="110" y="70" width="700" height="580" rx="18" fill="url(#cardGlow)" stroke="#d9e6e4"/>
+  </g>
+
+  <g class="body">
+    <rect x="110" y="70" width="700" height="7" rx="3.5" fill="url(#primary)"/>
+    <text class="title" x="158" y="139">快速记账</text>
+    <text class="link" x="625" y="139" text-anchor="end">完整表单</text>
+
+    <g transform="translate(158 178)">
+      <text class="label" x="0" y="0">金额</text>
+      <rect x="0" y="19" width="292" height="82" rx="14" fill="#ffffff" stroke="#d6e2e2" filter="url(#softShadow)"/>
+      <text class="mutedValue" x="28" y="71">0.00</text>
+    </g>
+
+    <g transform="translate(482 178)">
+      <text class="label" x="0" y="0">日期</text>
+      <rect x="0" y="19" width="280" height="82" rx="14" fill="#ffffff" stroke="#10a398" stroke-width="2.2" filter="url(#softShadow)"/>
+      <text class="value" x="28" y="71">2026/06/10</text>
+      <g transform="translate(223 42)">
+        <rect x="0" y="0" width="32" height="34" rx="6" fill="none" stroke="#092326" stroke-width="3"/>
+        <path d="M8 0v8M24 0v8M1 13h30" stroke="#092326" stroke-width="3" stroke-linecap="round"/>
+      </g>
+    </g>
+
+    <g transform="translate(158 315)">
+      <text class="label" x="0" y="0">一级分类</text>
+      <rect x="0" y="19" width="292" height="82" rx="14" fill="#ffffff" stroke="#d6e2e2"/>
+      <text class="selectValue" x="28" y="70">餐饮</text>
+      <path d="M252 51l11 11 11-11" fill="none" stroke="#07191c" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+    </g>
+
+    <g transform="translate(482 315)">
+      <text class="label" x="0" y="0">二级分类</text>
+      <rect x="0" y="19" width="280" height="82" rx="14" fill="#ffffff" stroke="#d6e2e2"/>
+      <text class="selectValue" x="28" y="70">外卖</text>
+      <path d="M240 51l11 11 11-11" fill="none" stroke="#07191c" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+    </g>
+
+    <g transform="translate(158 452)">
+      <text class="label" x="0" y="0">备注</text>
+      <rect x="0" y="19" width="604" height="82" rx="14" fill="#ffffff" stroke="#d6e2e2"/>
+      <text class="mutedValue" x="28" y="70">可选备注</text>
+    </g>
+
+    <g transform="translate(158 579)">
+      <rect x="0" y="0" width="604" height="72" rx="15" fill="url(#primary)" filter="url(#softShadow)"/>
+      <text class="buttonText" x="302" y="47" text-anchor="middle">保存支出</text>
+    </g>
+
+    <g transform="translate(145 112)">
+      <rect x="0" y="0" width="9" height="35" rx="4.5" fill="#18b7aa"/>
+    </g>
+  </g>
+</svg>
