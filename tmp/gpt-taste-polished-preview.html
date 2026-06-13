@@ -1,0 +1,919 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>记账工作台预览</title>
+    <style>
+      :root {
+        color-scheme: light;
+        --ink: #101820;
+        --muted: #66727c;
+        --line: #d9e1e6;
+        --paper: #fbfcfa;
+        --panel: rgba(255, 255, 255, 0.9);
+        --panel-solid: #ffffff;
+        --blue: #2358e6;
+        --blue-2: #163db6;
+        --teal: #07867d;
+        --mint: #e3f6f1;
+        --amber: #c98214;
+        --rose: #c9455a;
+        --violet: #6654d8;
+        --shadow: 0 24px 64px rgba(24, 38, 50, 0.13);
+        --soft-shadow: 0 12px 32px rgba(24, 38, 50, 0.08);
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        font-family:
+          Geist,
+          "Segoe UI",
+          "PingFang SC",
+          "Microsoft YaHei",
+          system-ui,
+          sans-serif;
+        background:
+          radial-gradient(circle at 76px 88px, rgba(35, 88, 230, 0.13), transparent 235px),
+          radial-gradient(circle at 92% 12%, rgba(7, 134, 125, 0.18), transparent 360px),
+          linear-gradient(135deg, #f9fbfa 0%, #eef3f2 44%, #f7f4ef 100%);
+        color: var(--ink);
+      }
+
+      .frame {
+        width: 1440px;
+        height: 960px;
+        overflow: hidden;
+        display: grid;
+        grid-template-columns: 236px 1fr;
+        background:
+          linear-gradient(90deg, rgba(255, 255, 255, 0.58), rgba(255, 255, 255, 0)),
+          transparent;
+      }
+
+      .sidebar {
+        padding: 26px 16px 18px;
+        border-right: 1px solid rgba(175, 190, 199, 0.7);
+        background: rgba(255, 255, 255, 0.74);
+        backdrop-filter: blur(24px);
+        display: flex;
+        flex-direction: column;
+        gap: 28px;
+      }
+
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 2px;
+      }
+
+      .mark {
+        width: 38px;
+        height: 38px;
+        border-radius: 12px;
+        display: grid;
+        place-items: center;
+        background: linear-gradient(145deg, #1f6bff, #0d8e84);
+        color: #fff;
+        font-weight: 900;
+        box-shadow: 0 15px 30px rgba(35, 88, 230, 0.28);
+      }
+
+      .brand strong,
+      .panel-title,
+      .metric strong,
+      .budget-name,
+      .expense-main strong {
+        letter-spacing: 0;
+      }
+
+      .brand strong {
+        display: block;
+        font-size: 15px;
+      }
+
+      .brand span,
+      .muted,
+      .metric span,
+      .metric em,
+      .panel-kicker,
+      .expense-main span,
+      .budget-rule,
+      label {
+        color: var(--muted);
+        font-size: 12px;
+        line-height: 1.35;
+      }
+
+      .nav {
+        display: grid;
+        gap: 7px;
+      }
+
+      .nav-item {
+        min-height: 44px;
+        border-radius: 12px;
+        padding: 0 12px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        color: #26333d;
+        font-size: 14px;
+        font-weight: 680;
+      }
+
+      .nav-item.active {
+        color: var(--blue);
+        background: #eaf0ff;
+        box-shadow: inset 0 0 0 1px #c4d3ff;
+      }
+
+      .nav-dot {
+        width: 26px;
+        height: 26px;
+        border-radius: 9px;
+        background: #eef3f5;
+        position: relative;
+        flex: 0 0 26px;
+      }
+
+      .nav-item.active .nav-dot {
+        background: var(--blue);
+      }
+
+      .nav-dot::before,
+      .nav-dot::after {
+        content: "";
+        position: absolute;
+        background: currentColor;
+        color: #7a8a94;
+      }
+
+      .nav-item.active .nav-dot::before,
+      .nav-item.active .nav-dot::after {
+        color: #fff;
+      }
+
+      .nav-dot.overview::before {
+        width: 13px;
+        height: 9px;
+        left: 7px;
+        top: 10px;
+        border: 2px solid currentColor;
+        border-top: 0;
+        border-radius: 2px;
+        background: transparent;
+      }
+
+      .nav-dot.overview::after {
+        width: 9px;
+        height: 9px;
+        left: 8px;
+        top: 6px;
+        border-left: 2px solid currentColor;
+        border-top: 2px solid currentColor;
+        transform: rotate(45deg);
+        background: transparent;
+      }
+
+      .nav-dot.plus::before,
+      .nav-dot.plus::after {
+        width: 13px;
+        height: 2px;
+        left: 7px;
+        top: 12px;
+        border-radius: 2px;
+      }
+
+      .nav-dot.plus::after {
+        transform: rotate(90deg);
+      }
+
+      .nav-dot.grid::before {
+        width: 12px;
+        height: 12px;
+        left: 7px;
+        top: 7px;
+        border: 2px solid currentColor;
+        border-radius: 3px;
+        background: transparent;
+      }
+
+      .nav-dot.list::before {
+        width: 14px;
+        height: 2px;
+        left: 6px;
+        top: 8px;
+        box-shadow: 0 5px 0 currentColor, 0 10px 0 currentColor;
+      }
+
+      .nav-dot.arrow::before {
+        width: 12px;
+        height: 12px;
+        left: 7px;
+        top: 6px;
+        border-left: 2px solid currentColor;
+        border-bottom: 2px solid currentColor;
+        transform: rotate(-45deg);
+        background: transparent;
+      }
+
+      .local-card {
+        margin-top: auto;
+        border: 1px solid rgba(185, 198, 206, 0.9);
+        border-radius: 14px;
+        padding: 15px 14px;
+        background: linear-gradient(180deg, #fff, #f3f7f6);
+        box-shadow: var(--soft-shadow);
+      }
+
+      .local-card b {
+        display: block;
+        margin-top: 4px;
+        font-size: 15px;
+      }
+
+      .content {
+        min-width: 0;
+        padding: 24px 24px 28px;
+      }
+
+      .canvas {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) 338px;
+        grid-template-areas:
+          "head head"
+          "metrics quick"
+          "main quick"
+          "main side";
+        gap: 18px;
+      }
+
+      .topbar {
+        grid-area: head;
+        min-height: 88px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 4px 2px 10px;
+      }
+
+      h1 {
+        margin: 0;
+        max-width: 760px;
+        font-size: 46px;
+        line-height: 0.98;
+        letter-spacing: 0;
+      }
+
+      .range {
+        margin-top: 10px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        color: var(--muted);
+        font-size: 13px;
+      }
+
+      .range i {
+        width: 7px;
+        height: 7px;
+        border-radius: 99px;
+        background: var(--teal);
+        box-shadow: 0 0 0 5px rgba(7, 134, 125, 0.12);
+      }
+
+      .segmented {
+        height: 42px;
+        display: inline-flex;
+        gap: 4px;
+        align-items: center;
+        padding: 4px;
+        border: 1px solid rgba(189, 201, 210, 0.9);
+        border-radius: 13px;
+        background: rgba(255, 255, 255, 0.78);
+        box-shadow: var(--soft-shadow);
+      }
+
+      .segmented span {
+        min-width: 68px;
+        height: 32px;
+        border-radius: 9px;
+        display: grid;
+        place-items: center;
+        color: #5d6871;
+        font-size: 13px;
+        font-weight: 720;
+      }
+
+      .segmented .active {
+        color: #fff;
+        background: linear-gradient(180deg, #3167ff, #1d51dd);
+        box-shadow: 0 9px 18px rgba(35, 88, 230, 0.3);
+      }
+
+      .metric-row {
+        grid-area: metrics;
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 14px;
+      }
+
+      .metric,
+      .panel {
+        border: 1px solid rgba(188, 201, 209, 0.85);
+        background: var(--panel);
+        box-shadow: var(--soft-shadow);
+        backdrop-filter: blur(18px);
+      }
+
+      .metric {
+        min-height: 124px;
+        border-radius: 16px;
+        padding: 19px 18px;
+        display: flex;
+        justify-content: space-between;
+        gap: 14px;
+        overflow: hidden;
+        position: relative;
+      }
+
+      .metric::after {
+        content: "";
+        position: absolute;
+        inset: auto -32px -48px auto;
+        width: 118px;
+        height: 118px;
+        border-radius: 50%;
+        opacity: 0.12;
+        background: currentColor;
+      }
+
+      .metric.spent {
+        color: var(--blue);
+      }
+
+      .metric.remaining {
+        color: var(--teal);
+      }
+
+      .metric.budget {
+        color: var(--violet);
+      }
+
+      .metric span,
+      .metric em {
+        display: block;
+        color: var(--muted);
+        font-style: normal;
+      }
+
+      .metric strong {
+        display: block;
+        margin: 9px 0 6px;
+        color: var(--ink);
+        font-size: 31px;
+        line-height: 1;
+      }
+
+      .metric-icon {
+        width: 48px;
+        height: 48px;
+        border-radius: 15px;
+        display: grid;
+        place-items: center;
+        background: color-mix(in srgb, currentColor 13%, white);
+        flex: 0 0 48px;
+        position: relative;
+      }
+
+      .metric-icon::before,
+      .metric-icon::after {
+        content: "";
+        position: absolute;
+        box-sizing: border-box;
+      }
+
+      .spent .metric-icon::before {
+        width: 18px;
+        height: 18px;
+        border: 2px solid currentColor;
+        border-radius: 4px;
+      }
+
+      .spent .metric-icon::after {
+        width: 8px;
+        height: 6px;
+        border-left: 2px solid currentColor;
+        border-bottom: 2px solid currentColor;
+        transform: rotate(-45deg);
+      }
+
+      .remaining .metric-icon::before {
+        width: 22px;
+        height: 15px;
+        border: 2px solid currentColor;
+        border-radius: 5px;
+      }
+
+      .remaining .metric-icon::after {
+        width: 4px;
+        height: 4px;
+        border-radius: 50%;
+        background: currentColor;
+        right: 15px;
+      }
+
+      .budget .metric-icon::before {
+        width: 4px;
+        height: 12px;
+        bottom: 14px;
+        background: currentColor;
+        border-radius: 2px;
+        box-shadow: 8px -5px 0 currentColor, 16px -10px 0 currentColor;
+      }
+
+      .main {
+        grid-area: main;
+        display: grid;
+        gap: 18px;
+      }
+
+      .quick {
+        grid-area: quick;
+      }
+
+      .side {
+        grid-area: side;
+      }
+
+      .panel {
+        border-radius: 18px;
+        padding: 18px;
+      }
+
+      .panel-head {
+        min-height: 32px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+      }
+
+      .panel-title {
+        margin: 0;
+        font-size: 18px;
+        line-height: 1.2;
+      }
+
+      .panel-action {
+        color: var(--blue);
+        font-size: 13px;
+        font-weight: 800;
+      }
+
+      .budget-table {
+        display: grid;
+        gap: 11px;
+        margin-top: 17px;
+      }
+
+      .budget-header,
+      .budget-row {
+        display: grid;
+        grid-template-columns: 1.3fr 0.72fr 0.72fr 0.72fr 1fr 48px;
+        gap: 12px;
+        align-items: center;
+      }
+
+      .budget-header {
+        padding: 0 13px 3px;
+        color: var(--muted);
+        font-size: 12px;
+        font-weight: 700;
+      }
+
+      .budget-row {
+        min-height: 70px;
+        border: 1px solid #d6e1e6;
+        border-radius: 14px;
+        padding: 11px 13px;
+        background: rgba(255, 255, 255, 0.86);
+      }
+
+      .budget-left {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .orb {
+        width: 38px;
+        height: 38px;
+        border-radius: 50%;
+        display: grid;
+        place-items: center;
+        font-weight: 900;
+      }
+
+      .orb.food {
+        color: #006b62;
+        background: #ddf7ef;
+      }
+
+      .orb.trans {
+        color: #2057dd;
+        background: #e5edff;
+      }
+
+      .orb.fun {
+        color: #a46506;
+        background: #fff1d1;
+      }
+
+      .budget-name {
+        display: block;
+        font-size: 15px;
+        font-weight: 820;
+      }
+
+      .budget-rule {
+        display: block;
+        margin-top: 4px;
+      }
+
+      .cell {
+        display: grid;
+        gap: 3px;
+        font-size: 13px;
+      }
+
+      .cell span {
+        color: var(--muted);
+        font-size: 11px;
+      }
+
+      .cell b {
+        font-size: 13px;
+      }
+
+      .positive {
+        color: var(--teal);
+      }
+
+      .bar {
+        height: 9px;
+        border-radius: 999px;
+        background: #e5ecef;
+        overflow: hidden;
+      }
+
+      .bar i {
+        display: block;
+        height: 100%;
+        border-radius: inherit;
+        background: linear-gradient(90deg, #18b7a8, #067f76);
+      }
+
+      .bar.blue i {
+        background: linear-gradient(90deg, #4b79ff, #2358e6);
+      }
+
+      .bar.amber i {
+        background: linear-gradient(90deg, #f1a72d, #b96d0d);
+      }
+
+      .percent {
+        text-align: right;
+        font-size: 13px;
+        font-weight: 850;
+      }
+
+      .recent {
+        display: grid;
+        gap: 10px;
+        margin-top: 15px;
+      }
+
+      .expense {
+        min-height: 58px;
+        border: 1px solid #d8e2e7;
+        border-radius: 14px;
+        padding: 11px 13px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        background: rgba(255, 255, 255, 0.84);
+      }
+
+      .expense-main {
+        flex: 1;
+      }
+
+      .expense-main strong,
+      .expense-main span {
+        display: block;
+      }
+
+      .amount {
+        text-align: right;
+        font-weight: 850;
+      }
+
+      .amount span {
+        display: block;
+        margin-top: 4px;
+        color: var(--muted);
+        font-size: 12px;
+        font-weight: 500;
+      }
+
+      .form {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 13px;
+        margin-top: 16px;
+      }
+
+      label {
+        display: grid;
+        gap: 7px;
+        font-weight: 700;
+      }
+
+      input,
+      .select-like {
+        min-height: 44px;
+        border: 1px solid #d4dfe5;
+        border-radius: 12px;
+        background: rgba(255, 255, 255, 0.92);
+        padding: 0 12px;
+        color: #1a2730;
+        font-size: 15px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+
+      .wide {
+        grid-column: 1 / -1;
+      }
+
+      .primary {
+        grid-column: 1 / -1;
+        min-height: 48px;
+        border: 0;
+        border-radius: 13px;
+        background: linear-gradient(180deg, #3167ff, #194cd2);
+        color: #fff;
+        font-size: 16px;
+        font-weight: 880;
+        box-shadow: 0 16px 28px rgba(35, 88, 230, 0.29);
+      }
+
+      .signals {
+        display: grid;
+        gap: 12px;
+        margin-top: 15px;
+      }
+
+      .signal {
+        border-radius: 15px;
+        padding: 14px;
+        background: #f7fafb;
+        border: 1px solid #dce5e9;
+        display: grid;
+        gap: 8px;
+      }
+
+      .signal strong {
+        font-size: 14px;
+      }
+
+      .signal-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        color: var(--muted);
+        font-size: 12px;
+      }
+
+      .mini {
+        height: 6px;
+        width: 92px;
+        border-radius: 99px;
+        overflow: hidden;
+        background: #e4ecef;
+      }
+
+      .mini i {
+        display: block;
+        height: 100%;
+        border-radius: inherit;
+        background: var(--teal);
+      }
+
+      .note-card {
+        margin-top: 14px;
+        min-height: 96px;
+        border-radius: 16px;
+        padding: 16px;
+        background:
+          linear-gradient(135deg, rgba(35, 88, 230, 0.1), transparent 56%),
+          #111a22;
+        color: #fff;
+        box-shadow: var(--shadow);
+      }
+
+      .note-card span {
+        color: rgba(255, 255, 255, 0.68);
+        font-size: 12px;
+      }
+
+      .note-card strong {
+        display: block;
+        margin-top: 8px;
+        font-size: 19px;
+        line-height: 1.28;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="frame">
+      <aside class="sidebar">
+        <div class="brand">
+          <div class="mark">￥</div>
+          <div>
+            <strong>每日记账</strong>
+            <span>本地支出流水</span>
+          </div>
+        </div>
+
+        <nav class="nav" aria-label="主导航">
+          <div class="nav-item active"><i class="nav-dot overview"></i>总览</div>
+          <div class="nav-item"><i class="nav-dot plus"></i>记一笔</div>
+          <div class="nav-item"><i class="nav-dot grid"></i>分类与预算</div>
+          <div class="nav-item"><i class="nav-dot list"></i>流水明细</div>
+          <div class="nav-item"><i class="nav-dot arrow"></i>导入导出</div>
+        </nav>
+
+        <div class="local-card">
+          <span class="muted">数据保存在本机</span>
+          <b>1 条流水</b>
+        </div>
+      </aside>
+
+      <main class="content">
+        <section class="canvas">
+          <header class="topbar">
+            <div>
+              <h1>总览</h1>
+              <div class="range"><i></i>每月 · 2026-06-01 至 2026-06-30</div>
+            </div>
+            <div class="segmented" aria-label="周期">
+              <span>每周</span>
+              <span class="active">每月</span>
+              <span>每年</span>
+            </div>
+          </header>
+
+          <div class="metric-row">
+            <article class="metric spent">
+              <div>
+                <span>已支出</span>
+                <strong>￥1,248.50</strong>
+                <em>本周期已记录支出</em>
+              </div>
+              <i class="metric-icon"></i>
+            </article>
+            <article class="metric remaining">
+              <div>
+                <span>剩余</span>
+                <strong>￥2,251.50</strong>
+                <em>可用预算</em>
+              </div>
+              <i class="metric-icon"></i>
+            </article>
+            <article class="metric budget">
+              <div>
+                <span>预算</span>
+                <strong>￥3,500.00</strong>
+                <em>3 条启用规则</em>
+              </div>
+              <i class="metric-icon"></i>
+            </article>
+          </div>
+
+          <section class="main">
+            <article class="panel">
+              <div class="panel-head">
+                <h2 class="panel-title">预算状态</h2>
+                <span class="panel-kicker">每月</span>
+              </div>
+              <div class="budget-table">
+                <div class="budget-header">
+                  <span>分类</span>
+                  <span>已支出</span>
+                  <span>预算</span>
+                  <span>剩余</span>
+                  <span>进度</span>
+                  <span></span>
+                </div>
+                <div class="budget-row">
+                  <div class="budget-left">
+                    <span class="orb food">餐</span>
+                    <div><span class="budget-name">餐饮</span><span class="budget-rule">每月规则</span></div>
+                  </div>
+                  <div class="cell"><span>已支出</span><b>￥1,248.50</b></div>
+                  <div class="cell"><span>预算</span><b>￥2,400.00</b></div>
+                  <div class="cell positive"><span>剩余</span><b>￥1,151.50</b></div>
+                  <div class="bar"><i style="width:52%"></i></div>
+                  <div class="percent">52%</div>
+                </div>
+                <div class="budget-row">
+                  <div class="budget-left">
+                    <span class="orb trans">行</span>
+                    <div><span class="budget-name">交通</span><span class="budget-rule">每月规则</span></div>
+                  </div>
+                  <div class="cell"><span>已支出</span><b>￥0.00</b></div>
+                  <div class="cell"><span>预算</span><b>￥600.00</b></div>
+                  <div class="cell positive"><span>剩余</span><b>￥600.00</b></div>
+                  <div class="bar blue"><i style="width:4%"></i></div>
+                  <div class="percent">0%</div>
+                </div>
+                <div class="budget-row">
+                  <div class="budget-left">
+                    <span class="orb fun">娱</span>
+                    <div><span class="budget-name">娱乐</span><span class="budget-rule">每月规则</span></div>
+                  </div>
+                  <div class="cell"><span>已支出</span><b>￥0.00</b></div>
+                  <div class="cell"><span>预算</span><b>￥500.00</b></div>
+                  <div class="cell positive"><span>剩余</span><b>￥500.00</b></div>
+                  <div class="bar amber"><i style="width:4%"></i></div>
+                  <div class="percent">0%</div>
+                </div>
+              </div>
+            </article>
+
+            <article class="panel">
+              <div class="panel-head">
+                <h2 class="panel-title">最近流水</h2>
+                <span class="panel-action">查看全部</span>
+              </div>
+              <div class="recent">
+                <div class="expense">
+                  <span class="orb food">餐</span>
+                  <div class="expense-main"><strong>餐饮 / 外卖</strong><span>团队午餐</span></div>
+                  <div class="amount">￥1,248.50<span>2026-06-07</span></div>
+                </div>
+              </div>
+            </article>
+          </section>
+
+          <aside class="panel quick">
+            <div class="panel-head">
+              <h2 class="panel-title">快速记账</h2>
+              <span class="panel-action">完整表单</span>
+            </div>
+            <form class="form">
+              <label>金额<input value="0.00" /></label>
+              <label>日期<input value="2026/06/07" /></label>
+              <label>一级分类<div class="select-like">餐饮<span>⌄</span></div></label>
+              <label>二级分类<div class="select-like">外卖<span>⌄</span></div></label>
+              <label class="wide">备注<input value="可选备注" /></label>
+              <button class="primary" type="button">保存支出</button>
+            </form>
+          </aside>
+
+          <aside class="panel side">
+            <div class="panel-head">
+              <h2 class="panel-title">提醒</h2>
+              <span class="panel-kicker">预算健康</span>
+            </div>
+            <div class="signals">
+              <div class="signal">
+                <strong>餐饮预算正常</strong>
+                <div class="signal-row"><span>已使用 52%</span><span class="mini"><i style="width:52%"></i></span></div>
+              </div>
+              <div class="signal">
+                <strong>没有接近或超支分类</strong>
+                <div class="signal-row"><span>继续保持当前节奏</span><span>良好</span></div>
+              </div>
+            </div>
+            <div class="note-card">
+              <span>本月节奏</span>
+              <strong>日均可用预算约 ￥75，可直接从快捷记账继续录入。</strong>
+            </div>
+          </aside>
+        </section>
+      </main>
+    </div>
+  </body>
+</html>

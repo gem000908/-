@@ -93,23 +93,26 @@ function overviewView(period) {
   const recent = state.data.expenses.slice(0, 6);
   return `
     <section class="view-grid">
-      <div class="main-column">
-        <header class="page-head">
-          <div>
-            <h1>总览</h1>
-            <p>${rangeLabel(period, today)}</p>
-          </div>
-          <div class="segmented" role="group" aria-label="总览周期">
-            ${["weekly", "monthly", "yearly"].map((item) => `
-              <button class="${period === item ? "active" : ""}" data-period="${item}">${labelPeriod(item)}</button>
-            `).join("")}
-          </div>
-        </header>
-        <div class="metric-row">
-          ${metricCard("spent", "已支出", money(totals.spent), "本周期已记录支出")}
-          ${metricCard("remaining", "剩余", money(totals.remaining), totals.remaining < 0 ? `超出预算 ${money(totals.overage)}` : "可用预算")}
-          ${metricCard("budgeted", "预算", money(totals.budgeted), `${rows.length} 条启用规则`)}
+      <header class="page-head overview-head">
+        <div>
+          <h1>总览</h1>
+          <p>${rangeLabel(period, today)}</p>
         </div>
+        <div class="segmented" role="group" aria-label="总览周期">
+          ${["weekly", "monthly", "yearly"].map((item) => `
+            <button class="${period === item ? "active" : ""}" data-period="${item}">${labelPeriod(item)}</button>
+          `).join("")}
+        </div>
+      </header>
+      <div class="metric-row">
+        ${metricCard("spent", "已支出", money(totals.spent), "本周期已记录支出")}
+        ${metricCard("remaining", "剩余", money(totals.remaining), totals.remaining < 0 ? `超出预算 ${money(totals.overage)}` : "可用预算")}
+        ${metricCard("budgeted", "预算", money(totals.budgeted), `${rows.length} 条启用规则`)}
+      </div>
+      <aside class="quick-add-column">
+        ${addExpenseView("compact")}
+      </aside>
+      <div class="main-column">
         <section class="panel budget-panel">
           <div class="panel-head">
             <h2>预算状态</h2>
@@ -137,7 +140,6 @@ function overviewView(period) {
         </section>
       </div>
       <aside class="right-column">
-        ${addExpenseView("compact")}
         <section class="panel">
           <div class="panel-head">
             <h2>提醒</h2>

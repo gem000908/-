@@ -1,0 +1,202 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="1040" viewBox="0 0 1600 1040">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#f8faf9"/>
+      <stop offset="1" stop-color="#eef4f2"/>
+    </linearGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="14" stdDeviation="18" flood-color="#1a2f32" flood-opacity="0.08"/>
+    </filter>
+    <style>
+      .ui { font-family: "Geist", "Microsoft YaHei", "Noto Sans SC", system-ui, sans-serif; letter-spacing: 0; }
+      .title { font-size: 30px; font-weight: 760; fill: #111f22; }
+      .section { font-size: 18px; font-weight: 740; fill: #15272a; }
+      .label { font-size: 13px; font-weight: 620; fill: #6c7b7d; }
+      .small { font-size: 13px; font-weight: 560; fill: #708083; }
+      .nav { font-size: 15px; font-weight: 650; fill: #526164; }
+      .navActive { font-size: 15px; font-weight: 740; fill: #0b6f68; }
+      .money { font-size: 31px; font-weight: 780; fill: #102326; }
+      .moneySmall { font-size: 17px; font-weight: 720; fill: #102326; }
+      .input { font-size: 20px; font-weight: 620; fill: #132528; }
+      .mutedInput { font-size: 20px; font-weight: 560; fill: #7b8789; }
+      .button { font-size: 20px; font-weight: 760; fill: #ffffff; }
+    </style>
+  </defs>
+
+  <rect width="1600" height="1040" fill="url(#bg)"/>
+  <rect x="44" y="36" width="1512" height="968" rx="28" fill="#fdfefe" stroke="#dce6e4"/>
+
+  <g class="ui">
+    <!-- Sidebar -->
+    <rect x="64" y="56" width="238" height="928" rx="20" fill="#ffffff" stroke="#dce6e4"/>
+    <g transform="translate(92 90)">
+      <rect x="0" y="0" width="40" height="40" rx="12" fill="#0b9188"/>
+      <text x="20" y="27" text-anchor="middle" font-size="21" font-weight="800" fill="#fff">¥</text>
+      <text x="54" y="18" font-size="17" font-weight="760" fill="#132528">每日记账</text>
+      <text x="54" y="40" class="small">本地支出流水</text>
+    </g>
+    <g transform="translate(84 170)">
+      <rect x="0" y="0" width="198" height="44" rx="12" fill="#e6f5f2"/>
+      <rect x="0" y="0" width="4" height="44" rx="2" fill="#0b9188"/>
+      <text x="44" y="28" class="navActive">总览</text>
+      <circle cx="22" cy="22" r="6" fill="#0b9188"/>
+      <text x="44" y="88" class="nav">记一笔</text>
+      <circle cx="22" cy="83" r="6" fill="#bdc8ca"/>
+      <text x="44" y="148" class="nav">分类与预算</text>
+      <circle cx="22" cy="143" r="6" fill="#bdc8ca"/>
+      <text x="44" y="208" class="nav">流水明细</text>
+      <circle cx="22" cy="203" r="6" fill="#bdc8ca"/>
+      <text x="44" y="268" class="nav">导入导出</text>
+      <circle cx="22" cy="263" r="6" fill="#bdc8ca"/>
+    </g>
+    <g transform="translate(92 902)">
+      <text class="label" x="0" y="0">数据保存在本机</text>
+      <text font-size="18" font-weight="740" fill="#132528" x="0" y="30">24 条流水</text>
+    </g>
+
+    <!-- Content header -->
+    <g transform="translate(338 78)">
+      <text class="title" x="0" y="34">总览</text>
+      <text class="small" x="0" y="62">每月：2026-06-01 至 2026-06-30</text>
+      <g transform="translate(814 0)">
+        <rect x="0" y="0" width="252" height="42" rx="12" fill="#ffffff" stroke="#dbe5e3"/>
+        <rect x="5" y="5" width="78" height="32" rx="9" fill="#0b9188"/>
+        <text x="44" y="27" text-anchor="middle" font-size="14" font-weight="720" fill="#fff">每周</text>
+        <text x="128" y="27" text-anchor="middle" font-size="14" font-weight="650" fill="#68777a">每月</text>
+        <text x="212" y="27" text-anchor="middle" font-size="14" font-weight="650" fill="#68777a">每年</text>
+      </g>
+    </g>
+
+    <!-- Metrics -->
+    <g transform="translate(338 164)">
+      <rect x="0" y="0" width="274" height="112" rx="16" fill="#ffffff" stroke="#dce6e4" filter="url(#shadow)"/>
+      <text class="label" x="24" y="34">已支出</text>
+      <text class="money" x="24" y="78">¥1,284.60</text>
+      <rect x="238" y="24" width="10" height="64" rx="5" fill="#2f67df"/>
+
+      <rect x="298" y="0" width="274" height="112" rx="16" fill="#ffffff" stroke="#dce6e4" filter="url(#shadow)"/>
+      <text class="label" x="322" y="34">剩余预算</text>
+      <text class="money" x="322" y="78">¥2,715.40</text>
+      <rect x="536" y="24" width="10" height="64" rx="5" fill="#0b9188"/>
+
+      <rect x="596" y="0" width="274" height="112" rx="16" fill="#ffffff" stroke="#dce6e4" filter="url(#shadow)"/>
+      <text class="label" x="620" y="34">预算总额</text>
+      <text class="money" x="620" y="78">¥4,000.00</text>
+      <rect x="834" y="24" width="10" height="64" rx="5" fill="#7357c8"/>
+    </g>
+
+    <!-- Main workbench -->
+    <g transform="translate(338 308)">
+      <!-- budget health -->
+      <rect x="0" y="0" width="760" height="382" rx="18" fill="#ffffff" stroke="#dce6e4" filter="url(#shadow)"/>
+      <text class="section" x="24" y="42">预算健康</text>
+      <text class="small" x="708" y="42" text-anchor="end">5 条启用规则</text>
+      <line x1="24" y1="64" x2="736" y2="64" stroke="#edf2f1"/>
+
+      <g transform="translate(24 92)">
+        <text class="label" x="0" y="0">分类</text>
+        <text class="label" x="256" y="0">已支出</text>
+        <text class="label" x="382" y="0">预算</text>
+        <text class="label" x="508" y="0">剩余</text>
+        <text class="label" x="642" y="0">进度</text>
+
+        <rect x="0" y="22" width="712" height="58" rx="12" fill="#fbfdfd"/>
+        <circle cx="24" cy="51" r="17" fill="#e5f6f2"/>
+        <text x="24" y="57" text-anchor="middle" font-size="14" font-weight="760" fill="#0b9188">餐</text>
+        <text class="moneySmall" x="54" y="57">餐饮</text>
+        <text class="small" x="256" y="57">¥586.00</text>
+        <text class="small" x="382" y="57">¥1,200.00</text>
+        <text class="small" x="508" y="57">¥614.00</text>
+        <rect x="642" y="46" width="58" height="8" rx="4" fill="#e3ebe9"/>
+        <rect x="642" y="46" width="28" height="8" rx="4" fill="#0b9188"/>
+
+        <rect x="0" y="96" width="712" height="58" rx="12" fill="#fff9ed"/>
+        <circle cx="24" cy="125" r="17" fill="#fff1d3"/>
+        <text x="24" y="131" text-anchor="middle" font-size="14" font-weight="760" fill="#b7791f">购</text>
+        <text class="moneySmall" x="54" y="131">购物</text>
+        <text class="small" x="256" y="131">¥428.60</text>
+        <text class="small" x="382" y="131">¥600.00</text>
+        <text class="small" x="508" y="131">¥171.40</text>
+        <rect x="642" y="120" width="58" height="8" rx="4" fill="#ead9b9"/>
+        <rect x="642" y="120" width="41" height="8" rx="4" fill="#b7791f"/>
+
+        <rect x="0" y="170" width="712" height="58" rx="12" fill="#fbfdfd"/>
+        <circle cx="24" cy="199" r="17" fill="#e8eefc"/>
+        <text x="24" y="205" text-anchor="middle" font-size="14" font-weight="760" fill="#2f67df">交</text>
+        <text class="moneySmall" x="54" y="205">交通</text>
+        <text class="small" x="256" y="205">¥126.00</text>
+        <text class="small" x="382" y="205">¥500.00</text>
+        <text class="small" x="508" y="205">¥374.00</text>
+        <rect x="642" y="194" width="58" height="8" rx="4" fill="#e1e8f7"/>
+        <rect x="642" y="194" width="15" height="8" rx="4" fill="#2f67df"/>
+
+        <rect x="0" y="244" width="712" height="58" rx="12" fill="#fbfdfd"/>
+        <circle cx="24" cy="273" r="17" fill="#fdecef"/>
+        <text x="24" y="279" text-anchor="middle" font-size="14" font-weight="760" fill="#c43b46">娱</text>
+        <text class="moneySmall" x="54" y="279">娱乐</text>
+        <text class="small" x="256" y="279">¥144.00</text>
+        <text class="small" x="382" y="279">¥300.00</text>
+        <text class="small" x="508" y="279">¥156.00</text>
+        <rect x="642" y="268" width="58" height="8" rx="4" fill="#f3d9de"/>
+        <rect x="642" y="268" width="28" height="8" rx="4" fill="#c43b46"/>
+      </g>
+
+      <!-- quick add -->
+      <rect x="792" y="0" width="396" height="382" rx="18" fill="#ffffff" stroke="#dce6e4" filter="url(#shadow)"/>
+      <text class="section" x="816" y="42">快速记账</text>
+      <text class="small" x="1148" y="42" text-anchor="end">完整表单</text>
+      <g transform="translate(816 78)">
+        <text class="label" x="0" y="0">金额</text>
+        <rect x="0" y="14" width="166" height="56" rx="12" fill="#ffffff" stroke="#d7e3e1"/>
+        <text x="18" y="50" class="mutedInput">0.00</text>
+        <text class="label" x="190" y="0">日期</text>
+        <rect x="190" y="14" width="158" height="56" rx="12" fill="#ffffff" stroke="#0b9188" stroke-width="2"/>
+        <text x="208" y="50" font-size="17" font-weight="680" fill="#132528">06/11</text>
+        <rect x="310" y="31" width="24" height="24" rx="5" fill="none" stroke="#132528" stroke-width="2.3"/>
+
+        <text class="label" x="0" y="108">一级分类</text>
+        <rect x="0" y="122" width="166" height="56" rx="12" fill="#ffffff" stroke="#d7e3e1"/>
+        <text x="18" y="158" class="input">餐饮</text>
+        <text class="label" x="190" y="108">二级分类</text>
+        <rect x="190" y="122" width="158" height="56" rx="12" fill="#ffffff" stroke="#d7e3e1"/>
+        <text x="208" y="158" class="input">外卖</text>
+
+        <text class="label" x="0" y="216">备注</text>
+        <rect x="0" y="230" width="348" height="56" rx="12" fill="#ffffff" stroke="#d7e3e1"/>
+        <text x="18" y="266" class="mutedInput">可选备注</text>
+        <rect x="0" y="310" width="348" height="58" rx="14" fill="#0b9188"/>
+        <text x="174" y="346" text-anchor="middle" class="button">保存支出</text>
+      </g>
+    </g>
+
+    <!-- Lower row -->
+    <g transform="translate(338 722)">
+      <rect x="0" y="0" width="760" height="242" rx="18" fill="#ffffff" stroke="#dce6e4" filter="url(#shadow)"/>
+      <text class="section" x="24" y="42">最近流水</text>
+      <text class="small" x="708" y="42" text-anchor="end">查看全部</text>
+      <line x1="24" y1="64" x2="736" y2="64" stroke="#edf2f1"/>
+      <g transform="translate(24 92)">
+        <text class="moneySmall" x="0" y="0">餐饮 / 外卖</text>
+        <text class="small" x="0" y="24">工作日晚餐</text>
+        <text class="moneySmall" x="688" y="0" text-anchor="end">¥36.00</text>
+        <text class="small" x="688" y="24" text-anchor="end">2026-06-11</text>
+        <line x1="0" y1="48" x2="688" y2="48" stroke="#edf2f1"/>
+        <text class="moneySmall" x="0" y="82">交通 / 打车</text>
+        <text class="small" x="0" y="106">雨天通勤</text>
+        <text class="moneySmall" x="688" y="82" text-anchor="end">¥24.00</text>
+        <text class="small" x="688" y="106" text-anchor="end">2026-06-10</text>
+      </g>
+
+      <rect x="792" y="0" width="396" height="242" rx="18" fill="#ffffff" stroke="#dce6e4" filter="url(#shadow)"/>
+      <text class="section" x="816" y="42">提醒</text>
+      <g transform="translate(816 76)">
+        <rect x="0" y="0" width="348" height="54" rx="12" fill="#fff9ed" stroke="#ecd8ab"/>
+        <text class="moneySmall" x="18" y="25">购物接近预算</text>
+        <text class="small" x="18" y="44">已使用 71%，剩余 ¥171.40</text>
+        <rect x="0" y="72" width="348" height="54" rx="12" fill="#f7fbfa" stroke="#dce6e4"/>
+        <text class="moneySmall" x="18" y="97">连续记账 5 天</text>
+        <text class="small" x="18" y="116">今天日期已自动填好</text>
+      </g>
+    </g>
+  </g>
+</svg>

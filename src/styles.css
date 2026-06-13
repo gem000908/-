@@ -340,15 +340,41 @@ h3 {
 .view-grid {
   display: grid;
   grid-template-columns: minmax(0, 1fr) 360px;
+  grid-template-areas:
+    "head head"
+    "metrics metrics"
+    "main quick"
+    "main right";
   gap: 22px;
   align-items: start;
 }
 
 .main-column,
+.quick-add-column,
 .right-column {
   display: grid;
   gap: 22px;
   align-content: start;
+}
+
+.overview-head {
+  grid-area: head;
+}
+
+.view-grid > .metric-row {
+  grid-area: metrics;
+}
+
+.view-grid > .main-column {
+  grid-area: main;
+}
+
+.quick-add-column {
+  grid-area: quick;
+}
+
+.right-column {
+  grid-area: right;
 }
 
 .page-head,
@@ -1358,10 +1384,17 @@ tbody tr:last-child td {
 @media (max-width: 1120px) {
   .view-grid {
     grid-template-columns: 1fr;
+    grid-template-areas:
+      "head"
+      "metrics"
+      "quick"
+      "main"
+      "right";
   }
 
+  .quick-add-column,
   .right-column {
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: 1fr;
   }
 
   .compact-panel .default-date-field {
@@ -1388,6 +1421,7 @@ tbody tr:last-child td {
   }
 
   .metric-row,
+  .quick-add-column,
   .right-column {
     grid-template-columns: 1fr;
   }
@@ -1512,6 +1546,7 @@ tbody tr:last-child td {
 
   .metric-row,
   .main-column,
+  .quick-add-column,
   .right-column,
   .view-grid {
     gap: 14px;
